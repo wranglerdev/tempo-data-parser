@@ -110,17 +110,42 @@ export class TempoComponent {
         </div>
       </div>
       
-      <div class="px-6 pb-6 pt-2 border-t border-base-200">
+      <div class="px-6 pb-4 pt-2 border-t border-base-200">
+        <div class="flex flex-col md:flex-row gap-4 md:gap-8 items-start md:items-center">
+          <div class="form-control">
+            <label class="label cursor-pointer gap-2 py-0">
+              <span class="text-[10px] font-bold uppercase tracking-widest opacity-40">Force Range</span> 
+              <input type="checkbox" id="playground-force-range" class="toggle toggle-primary toggle-xs" />
+            </label>
+          </div>
+          
+          <div class="form-control flex-1 w-full">
+            <label class="label gap-2 py-0 justify-start">
+              <span class="text-[10px] font-bold uppercase tracking-widest opacity-40 whitespace-nowrap">Restrict To</span>
+              <select id="playground-restrict-to" class="select select-ghost select-xs w-full max-w-[120px] font-bold text-primary/60 focus:bg-transparent">
+                <option value="all">All</option>
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+                <option value="holiday">Holiday</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 pb-6 pt-4 border-t border-base-200">
         <div id="playground-meta" class="flex flex-col md:flex-row md:items-center justify-between gap-4 text-sm text-base-content/50">
-          <div id="playground-examples" class="italic flex items-center gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
+          <div id="playground-examples" class="italic flex items-center gap-2 overflow-x-auto no-scrollbar whitespace-nowrap pb-2">
             <span class="font-bold non-italic opacity-40">Exemplos:</span>
-            <span class="hover:text-primary cursor-pointer transition-colors" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">amanhã</span>
+            <span class="hover:text-primary cursor-pointer transition-colors py-1 px-2 bg-base-200/50 rounded-md" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">amanhã</span>
             <span class="opacity-20">•</span>
-            <span class="hover:text-primary cursor-pointer transition-colors" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">próxima segunda</span>
+            <span class="hover:text-primary cursor-pointer transition-colors py-1 px-2 bg-base-200/50 rounded-md" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">próxima segunda</span>
             <span class="opacity-20">•</span>
-            <span class="hover:text-primary cursor-pointer transition-colors" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">de hoje até sexta</span>
+            <span class="hover:text-primary cursor-pointer transition-colors py-1 px-2 bg-base-200/50 rounded-md" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">de hoje até sexta</span>
             <span class="opacity-20">•</span>
-            <span class="hover:text-primary cursor-pointer transition-colors" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">natal até ano novo</span>
+            <span class="hover:text-primary cursor-pointer transition-colors py-1 px-2 bg-base-200/50 rounded-md" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">natal até ano novo</span>
           </div>
           <div class="hidden md:block opacity-40">Pressione <kbd class="kbd kbd-xs">Tab</kbd> para navegar.</div>
         </div>
@@ -216,6 +241,9 @@ export class TempoComponent {
     import { tempo } from "../../../src/index";
 
     const input = document.getElementById('playground-input') as HTMLInputElement;
+    const forceRangeToggle = document.getElementById('playground-force-range') as HTMLInputElement;
+    const restrictToSelect = document.getElementById('playground-restrict-to') as HTMLSelectElement;
+    
     const loader = document.getElementById('playground-loader');
     const output = document.getElementById('playground-output');
     const error = document.getElementById('playground-error');
@@ -253,10 +281,8 @@ export class TempoComponent {
       return formatSingle(parts[0]);
     };
 
-    input?.addEventListener('input', (e) => {
-      const val = (e.target as HTMLInputElement).value;
-      
-      clearTimeout(timeout);
+    const runParse = () => {
+      const val = input.value;
       
       if (!val.trim()) {
         hideAll();
@@ -267,7 +293,10 @@ export class TempoComponent {
       
       timeout = setTimeout(() => {
         try {
-          const parsed = tempo(val);
+          const parsed = tempo(val, {
+            forceRange: forceRangeToggle.checked,
+            restrictTo: restrictToSelect.value as any
+          });
           loader?.classList.add('hidden');
           
           if (parsed) {
@@ -280,6 +309,21 @@ export class TempoComponent {
           showError();
         }
       }, 300);
+    };
+
+    input?.addEventListener('input', () => {
+      clearTimeout(timeout);
+      runParse();
+    });
+
+    forceRangeToggle?.addEventListener('change', () => {
+      clearTimeout(timeout);
+      runParse();
+    });
+
+    restrictToSelect?.addEventListener('change', () => {
+      clearTimeout(timeout);
+      runParse();
     });
 
     function hideAll() {
