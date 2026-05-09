@@ -3,9 +3,7 @@ import { toISODate, daysOfWeek, meses, mesesAbrev, calculateEaster } from './uti
 export function parseSingleDate(input: string, ref: Date, contextDate?: Date): string | null {
   let mathVal = 0;
   let mathUnit: string | undefined;
-  
-  // Cleanup for components
-  let cleanInput = input.replace(/\b(?:mesmo|msm|ja|foi|aconteceu|la|ai|pouco|noite|cedo|tarde|manha|uns|os|as)\b/g, ' ').replace(/\s+/g, ' ').trim();
+  let cleanInput = input;
 
   const mathMatch = cleanInput.match(/\s+([+-]|mais|menos)\s*(\d+)(?:\s*(dia|semana|mes|ano)(?:es|s)?)?$/);
   if (mathMatch && mathMatch[1] && mathMatch[2]) {
@@ -39,13 +37,14 @@ function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null 
     .replace(/\s+/g, ' ')
     .trim();
 
+  // 1. Básicos
   if (clean === 'hoje' || clean === 'agora' || clean === 'atras') return date;
   if (clean === 'amanha') return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
   if (clean === 'ontem') return new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1);
   if (clean === 'anteontem' || clean === 'dia antes ontem') return new Date(date.getFullYear(), date.getMonth(), date.getDate() - 2);
   if (clean === 'depois amanha' || clean === 'depois de amanha') return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 2);
 
-  // 2. Relativos Complexos
+  // 2. Relativos Complexos (Antes/Depois)
   const relRegex = /^(.*?)\s+(antes|depois)\s+(.*)$/;
   const relMatch = clean.match(relRegex);
   if (relMatch && relMatch[1] && relMatch[2] && relMatch[3]) {
@@ -114,6 +113,8 @@ function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null 
     'dia pais': () => { const d = new Date(baseYear, 7, 1); const dow = d.getDay(); d.setDate(1 + (dow === 0 ? 7 : (7 - dow) + 7)); return d; },
     'natal': () => new Date(baseYear, 11, 25),
     'reveillon': () => new Date(baseYear, 11, 31),
+    'reveilon': () => new Date(baseYear, 11, 31),
+    'reveion': () => new Date(baseYear, 11, 31),
     'ano novo': () => new Date(baseYear, 0, 1),
     'pascoa': () => calculateEaster(baseYear),
     'sexta paixao': () => { const d = calculateEaster(baseYear); d.setDate(d.getDate() - 2); return d; },
@@ -129,9 +130,12 @@ function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null 
     }
   }
 
-  // 4. Meados
-  if (clean.startsWith('meados ')) {
-    const d = getBaseDate(clean.replace('meados ', ''), ref, contextDate);
+  // 4. Meados / Meio
+  if (clean.startsWith('meados ') || clean.startsWith('meio ')) {
+    const target = clean.replace(/^(meados|meio)\s+/, '');
+    if (target === 'ano') return new Date(baseYear, 5, 15);
+    if (target === 'mes') return new Date(date.getFullYear(), date.getMonth(), 15);
+    const d = getBaseDate(target, ref, contextDate);
     if (d) { d.setDate(15); return d; }
   }
 
@@ -150,6 +154,15 @@ function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null 
        if (type.startsWith('fim') || type.startsWith('final')) d.setDate(d.getDate() + 6);
        return d;
     }
+    if (cleanPart === 'mes') {
+       const d = new Date(date);
+       if (type.startsWith('fim') || type.startsWith('final')) {
+          d.setMonth(d.getMonth() + 1); d.setDate(0);
+       } else {
+          d.setDate(1);
+       }
+       return d;
+    }
     const d = getBaseDate(cleanPart, ref, contextDate);
     if (d) {
       if (type.startsWith('inicio') || type.startsWith('comeco')) { d.setDate(1); return d; }
@@ -158,6 +171,10 @@ function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null 
   }
 
   // 6. Números Diretos
+  if (/^\b(19|20)\d{2}\b$/.test(clean)) {
+    const y = parseInt(clean);
+    return new Date(y, 0, 1);
+  }
   if (/^\d{1,2}$/.test(clean)) {
     const d = new Date(contextDate || date); d.setDate(parseInt(clean));
     if (d.getDate() !== parseInt(clean)) return null;
@@ -190,7 +207,7 @@ function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null 
   const prefixRelMatch = input.match(/^(?:daqui|\bem\s+a\b|\bem\s+de\b|\bem\b|\bha\b|\bfaz\b|\btem\b|ultimos?)\s+(?:a\s+|de\s+)?(\d+)\s+(dia|semana|mes|ano)(?:es|s)?/);
   if (prefixRelMatch && prefixRelMatch[1] && prefixRelMatch[2]) {
     const amount = parseInt(prefixRelMatch[1]); const unit = prefixRelMatch[2];
-    const mult = (input.includes('daqui') || /\bem\b/.test(input)) ? 1 : -1;
+    const mult = (input.includes('daqui') || /\bem\b/.test(input) || /\s+em\s+/.test(input)) ? 1 : -1;
     const res = new Date(date);
     if (unit === 'dia') res.setDate(res.getDate() + amount * mult);
     else if (unit === 'semana') res.setDate(res.getDate() + amount * 7 * mult);
@@ -223,6 +240,7 @@ function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null 
     }
   }
 
+  // 11. Formatos Numéricos
   const yyyymmdd = clean.match(/^(\d{4}) (\d{1,2}) (\d{1,2})$/);
   if (yyyymmdd && yyyymmdd[1] && yyyymmdd[2] && yyyymmdd[3]) {
     const y = parseInt(yyyymmdd[1]); const m = parseInt(yyyymmdd[2]) - 1; const d = parseInt(yyyymmdd[3]);
@@ -240,6 +258,7 @@ function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null 
     return new Date(y, m, 1);
   }
 
+  // 12. Mês por extenso
   for (let i = 0; i < 12; i++) {
     const regex = new RegExp(`\\b(?:${meses[i]}|${mesesAbrev[i]})\\b`);
     if (regex.test(clean)) {

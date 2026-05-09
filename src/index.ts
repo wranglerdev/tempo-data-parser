@@ -7,6 +7,28 @@ export * from './types';
 export function tempo(input: string, options: TempoOptions = {}): string | null {
   if (!input) return null;
   const normalizedInput = normalizeString(input);
+  
+  // classification check
+  const restrictTo = options.restrictTo || 'all';
+  if (restrictTo !== 'all') {
+    const isYear = /\bano[s]?\b|\b(?:19|20)\d{2}\b/.test(normalizedInput);
+    const isMonth = /\bmes(?:es)?\b|janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez/.test(normalizedInput);
+    const isWeek = /\bsemana[s]?\b|fds/.test(normalizedInput);
+    const isHoliday = /\bnatal|reveillon|reveilon|reveion|pascoa|carnaval|tiradentes|trabalhador|aparecida|finados|republica|consciencia|universal|maes|pais\b/.test(normalizedInput);
+    const isNumericDate = /^\d{1,2}([\/\-\s.]\d{1,2}){1,2}/.test(normalizedInput);
+    const isStandaloneYear = /^\b(19|20)\d{2}\b$/.test(normalizedInput);
+    const isDay = /\bdia[s]?\b|hoje|amanha|ontem|anteontem|agora|atras|daqui|segunda|terca|quarta|quinta|sexta|sabado|domingo/.test(normalizedInput) || (isNumericDate && !isStandaloneYear) || /^\d{1,2}$/.test(normalizedInput);
+
+    if (restrictTo === 'year' && !isYear) return null;
+    if (restrictTo === 'month' && !isMonth) return null;
+    if (restrictTo === 'week' && !isWeek) return null;
+    if (restrictTo === 'holiday' && !isHoliday) return null;
+    if (restrictTo === 'day' && !isDay) return null;
+    
+    if (restrictTo === 'holiday' && isDay && !isHoliday) return null;
+    if (restrictTo === 'month' && isDay && !isMonth) return null;
+  }
+
   const refDate = options.referenceDate || new Date();
   const ref = new Date(refDate);
   ref.setHours(0, 0, 0, 0);
@@ -53,16 +75,7 @@ export function tempo(input: string, options: TempoOptions = {}): string | null 
     return `${ref.getFullYear()}-01-01/${toISODate(ref)}`;
   }
 
-  const rangeDelims = [/\s+ate\s+/, /\s+ao\s+/, /->/, /\.\.\.\./, /\.\.\./, /\.\./, /\s+pra\s+ca\b/, /\s+e\s+/, /\s+-\s+/, /\s+a\s+/];
-
-  // 2. Ranges por Conectores
-  const entreMatch = normalizedInput.match(/^entre\s+(.*?)\s+e\s+(.*)$/);
-  if (entreMatch && entreMatch[1] && entreMatch[2]) {
-    const s = parseSingleDate(entreMatch[1].trim(), ref);
-    const e = parseSingleDate(entreMatch[2].trim(), ref);
-    if (s && e) return `${s}/${e}`;
-    return null;
-  }
+  const rangeDelims = [/\s+ate\s+/, /\s+ao\s+/, /->/, /\.\.\.\./, /\.\.\./, /\.\./, /\s+pra\s+ca\b/, /\s+e\s+/, /\s*-\s*/, /\b\s+a\s+\b/];
 
   const rangeInput = normalizedInput.replace(/^(de|desde|dos|do|da|o|a)\s+/, '');
   
@@ -80,9 +93,10 @@ export function tempo(input: string, options: TempoOptions = {}): string | null 
         let ePart = parts[1]?.trim();
         if (!sPart) continue;
 
+        // Skip split if it looks like a day-of-week phrase
+        const dSrc = delim.source;
         if (sPart === 'terca' || sPart === 'quarta' || sPart === 'quinta' || sPart === 'sexta' || sPart === 'segunda' || sPart === 'sabado' || sPart === 'domingo') {
-           const dSrc = delim.source;
-           if (dSrc === '\\s+a\\s+' || dSrc === '\\s+e\\s+') {
+           if (dSrc === '\\s+a\\s+' || dSrc === '\\s+e\\s+' || dSrc === '\\s*-\\s*') {
               const single = parseSingleDate(normalizedInput, ref);
               if (single && !normalizedInput.includes(' ate ') && !normalizedInput.includes(' ao ')) return single;
            }

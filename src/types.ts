@@ -10,4 +10,10 @@ export interface TempoOptions {
    * @default false
    */
   forceRange?: boolean;
+  /**
+   * Limita a interpretação da data a um universo específico.
+   * Se a entrada não pertencer a essa granularidade, retorna null.
+   * @default 'all'
+   */
+  restrictTo?: 'day' | 'week' | 'month' | 'year' | 'holiday' | 'all';
 }

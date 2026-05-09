@@ -31,6 +31,10 @@ const data = tempo('amanhã');
 // Usando forceRange para garantir um intervalo
 const range = tempo('3 meses atrás', { forceRange: true }); 
 // Resultado: "2026-02-09/2026-05-09" (considerando hoje como 09/05)
+
+// Usando restrictTo para limitar o universo de interpretação
+const mesApenas = tempo('amanhã', { restrictTo: 'month' }); 
+// Resultado: null (pois amanhã é uma unidade de 'day')
 ```
 
 ## 🛠 Exemplos de Uso
@@ -52,6 +56,14 @@ const range = tempo('3 meses atrás', { forceRange: true });
 | `meados do mês passado` | `2026-04-15` |
 | `vinte e um de maio` | `2026-05-21` |
 | `ano retrasado` | `2024-01-01/2024-12-31` |
+
+### Opção `restrictTo`
+Permite filtrar entradas que não pertencem à granularidade desejada:
+- `'day'`: Aceita datas absolutas, dias da semana e termos como "amanhã".
+- `'week'`: Aceita "esta semana", "fds", "semana passada".
+- `'month'`: Aceita nomes de meses e termos como "mês passado".
+- `'year'`: Aceita anos absolutos (2026) e "ano que vem".
+- `'holiday'`: Aceita apenas nomes de feriados ("natal").
 
 ---
 

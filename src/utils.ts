@@ -1,24 +1,17 @@
 export function levenshtein(a: string, b: string): number {
   if (a.length === 0) return b.length;
   if (b.length === 0) return a.length;
-  
   const width = a.length + 1;
   const matrix: number[] = new Array((b.length + 1) * width).fill(0);
-  
-  for (let i = 0; i <= a.length; i += 1) {
-    matrix[i] = i;
-  }
-  for (let j = 0; j <= b.length; j += 1) {
-    matrix[j * width] = j;
-  }
-  
+  for (let i = 0; i <= a.length; i += 1) matrix[i] = i;
+  for (let j = 0; j <= b.length; j += 1) matrix[j * width] = j;
   for (let j = 1; j <= b.length; j += 1) {
     for (let i = 1; i <= a.length; i += 1) {
       const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
-      const val1 = matrix[j * width + (i - 1)] ?? 0;
-      const val2 = matrix[(j - 1) * width + i] ?? 0;
-      const val3 = matrix[(j - 1) * width + (i - 1)] ?? 0;
-      matrix[j * width + i] = Math.min(val1 + 1, val2 + 1, val3 + indicator);
+      const v1 = matrix[j * width + (i - 1)] ?? 0;
+      const v2 = matrix[(j - 1) * width + i] ?? 0;
+      const v3 = matrix[(j - 1) * width + (i - 1)] ?? 0;
+      matrix[j * width + i] = Math.min(v1 + 1, v2 + 1, v3 + indicator);
     }
   }
   return matrix[b.length * width + a.length] ?? 0;
@@ -30,7 +23,7 @@ const fuzzyDictionary = [
   'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo', 
   'proximo', 'proxima', 'passado', 'passada', 'semana', 'natal', 'pascoa', 'carnaval', 'reveillon',
   'mes', 'ano', 'dia', 'mais', 'menos', 'antes', 'depois', 'inicio', 'comeco', 'fim', 'final', 'atras', 'maes', 'pais',
-  'meses', 'anos', 'dias', 'semanas', 'esta', 'este', 'agora', 'instante', 'momento', 'retrasado', 'retrasada', 'meados', 'virada', 'desde',
+  'meses', 'anos', 'dias', 'semanas', 'esta', 'este', 'agora', 'instante', 'momento', 'retrasado', 'retrasada', 'meados', 'meio', 'virada', 'desde',
   'daqui', 'uns', 'faz', 'tem', 'cada', 'ate', 'entre', 'horas',
   'santa', 'paixao', 'tiradentes', 'trabalhador', 'trabalho', 'corpus', 'christi', 'independencia', 'aparecida', 'finados', 'republica', 'consciencia', 'negra', 'universal'
 ];
@@ -47,13 +40,10 @@ export function fuzzyReplace(input: string): string {
   const words = input.split(/\s+/);
   return words.map(w => {
     if (!w) return '';
-    const sMatch = slangMap[w];
-    if (sMatch !== undefined) return sMatch;
-    
-    const nMatch = numberMap[w];
-    if (nMatch !== undefined) return nMatch;
-
+    if (slangMap[w]) return slangMap[w] as string;
+    if (numberMap[w]) return numberMap[w] as string;
     if (w.length < 4) return w; 
+    if (w === 'meio' || w === 'maio' || w === 'terca' || w === 'sexta') return w;
     let bestMatch = w;
     let minDist = Infinity;
     for (const correct of fuzzyDictionary) {
@@ -89,9 +79,8 @@ export function normalizeString(str: string): string {
 
   normalized = fuzzyReplace(normalized);
 
-  // Final noise removal (less aggressive)
-  normalized = normalized.replace(/\b(?:ja|isso|foi|tipo|aconteceu|la|ai|pouco|noite|cedo|tarde|manha|uns|os|as)\b/g, ' ').replace(/\s+/g, ' ').trim();
-
+  // Noise removal
+  normalized = normalized.replace(/\b(?:ja|isso|foi|tipo|aconteceu|la|ai|pouco|mesmo|noite|cedo|tarde|manha|uns|os|as)\b/g, ' ').replace(/\s+/g, ' ').trim();
   return normalized;
 }
 
