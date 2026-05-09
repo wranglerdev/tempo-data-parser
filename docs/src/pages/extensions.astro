@@ -50,7 +50,7 @@ const intervalo = tempoToDate("2026-05-09/2026-05-15"); // [Date, Date]`;
     <div class="mockup-code mt-6 max-h-[600px] overflow-auto relative group not-prose">
       <button 
         class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-        onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Utilitário copiado!')"
+        onclick="const btn = this; const oldText = btn.innerText; navigator.clipboard.writeText(btn.parentElement.querySelector('code').innerText); btn.innerText = 'Copiado!'; btn.classList.add('btn-success', 'text-white'); setTimeout(() => { btn.innerText = oldText; btn.classList.remove('btn-success', 'text-white'); }, 2000);"
       >
         Copiar
       </button>

@@ -94,7 +94,7 @@ const errorSnippet = `try {
   <div class="mockup-code mt-4 max-h-[500px] overflow-auto relative group not-prose">
     <button 
       class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-      onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Código copiado!')"
+      onclick="const btn = this; const oldText = btn.innerText; navigator.clipboard.writeText(btn.parentElement.querySelector('code').innerText); btn.innerText = 'Copiado!'; btn.classList.add('btn-success', 'text-white'); setTimeout(() => { btn.innerText = oldText; btn.classList.remove('btn-success', 'text-white'); }, 2000);"
     >
       Copiar
     </button>

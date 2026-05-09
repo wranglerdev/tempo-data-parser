@@ -166,7 +166,7 @@ export class TempoComponent {
             <span class="badge badge-outline opacity-50">v18+</span>
           </div>
           <div class="mockup-code relative group max-h-[500px] overflow-auto">
-            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Copiado!')">Copiar</button>
+            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="const btn = this; const oldText = btn.innerText; navigator.clipboard.writeText(btn.parentElement.querySelector('code').innerText); btn.innerText = 'Copiado!'; btn.classList.add('btn-success', 'text-white'); setTimeout(() => { btn.innerText = oldText; btn.classList.remove('btn-success', 'text-white'); }, 2000);">Copiar</button>
             <Code code={reactUseState} lang="ts" theme="nord" class="bg-transparent! px-5" />
           </div>
         </section>
@@ -177,7 +177,7 @@ export class TempoComponent {
             <span class="badge badge-outline opacity-50">v7+</span>
           </div>
           <div class="mockup-code relative group max-h-[500px] overflow-auto">
-            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Copiado!')">Copiar</button>
+            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="const btn = this; const oldText = btn.innerText; navigator.clipboard.writeText(btn.parentElement.querySelector('code').innerText); btn.innerText = 'Copiado!'; btn.classList.add('btn-success', 'text-white'); setTimeout(() => { btn.innerText = oldText; btn.classList.remove('btn-success', 'text-white'); }, 2000);">Copiar</button>
             <Code code={reactHookForm} lang="ts" theme="nord" class="bg-transparent! px-5" />
           </div>
         </section>
@@ -193,7 +193,7 @@ export class TempoComponent {
             <span class="badge badge-outline opacity-50">Signals</span>
           </div>
           <div class="mockup-code relative group max-h-[500px] overflow-auto">
-            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Copiado!')">Copiar</button>
+            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="const btn = this; const oldText = btn.innerText; navigator.clipboard.writeText(btn.parentElement.querySelector('code').innerText); btn.innerText = 'Copiado!'; btn.classList.add('btn-success', 'text-white'); setTimeout(() => { btn.innerText = oldText; btn.classList.remove('btn-success', 'text-white'); }, 2000);">Copiar</button>
             <Code code={angular19} lang="ts" theme="nord" class="bg-transparent! px-5" />
           </div>
         </section>
@@ -204,7 +204,7 @@ export class TempoComponent {
             <span class="badge badge-outline opacity-50">RxJS</span>
           </div>
           <div class="mockup-code relative group max-h-[500px] overflow-auto">
-            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Copiado!')">Copiar</button>
+            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="const btn = this; const oldText = btn.innerText; navigator.clipboard.writeText(btn.parentElement.querySelector('code').innerText); btn.innerText = 'Copiado!'; btn.classList.add('btn-success', 'text-white'); setTimeout(() => { btn.innerText = oldText; btn.classList.remove('btn-success', 'text-white'); }, 2000);">Copiar</button>
             <Code code={angular17} lang="ts" theme="nord" class="bg-transparent! px-5" />
           </div>
         </section>

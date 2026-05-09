@@ -32,6 +32,7 @@ Para enriquecer as capacidades do `tempo`, utilizamos a excelente biblioteca web
 Ela foca fortemente em input de linguagem natural para preenchimento de inputs de datas (ambiguity resolution e smart completation).
 
 **Como achar informações e features inspiracionais no hot-date no futuro:**
+
 1. Verifique os **testes** do repositório no Github para entender casos extremos (edge-cases) e padrões que o parser deles prevê:
    `https://github.com/stolinski/hot-date/tree/main/src` (procure por testes).
 2. Explore a lógica do seu motor natural para mapear quais outras expressões ou tempos relativos eles suportam nativamente que poderiam enriquecer esta versão em português.
