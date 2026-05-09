@@ -27,6 +27,10 @@ import { tempo } from './utils/tempo';
 
 // Retorna YYYY-MM-DD ou YYYY-MM-DD/YYYY-MM-DD
 const data = tempo('amanhã'); 
+
+// Usando forceRange para garantir um intervalo
+const range = tempo('3 meses atrás', { forceRange: true }); 
+// Resultado: "2026-02-09/2026-05-09" (considerando hoje como 09/05)
 ```
 
 ## 🛠 Exemplos de Uso

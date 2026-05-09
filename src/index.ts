@@ -125,5 +125,19 @@ export function tempo(input: string, options: TempoOptions = {}): string | null 
     }
   }
 
-  return parseSingleDate(normalizedInput, ref);
+  const rawResult = parseSingleDate(normalizedInput, ref);
+
+  if (options.forceRange && rawResult && !rawResult.includes('/')) {
+    const resDate = new Date(rawResult + 'T12:00:00');
+    const refDateISO = toISODate(ref);
+    if (resDate.getTime() < ref.getTime()) {
+      return `${rawResult}/${refDateISO}`;
+    } else if (resDate.getTime() > ref.getTime()) {
+      return `${refDateISO}/${rawResult}`;
+    } else {
+      return `${rawResult}/${rawResult}`;
+    }
+  }
+
+  return rawResult;
 }
