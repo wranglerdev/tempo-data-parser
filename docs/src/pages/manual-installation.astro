@@ -1,0 +1,52 @@
+---
+import DocLayout from "../layouts/DocLayout.astro";
+---
+
+<DocLayout title="Manual Installation">
+  <h1>Manual Installation (Vendorizing)</h1>
+  
+  <p>
+    <strong>Tempo</strong> was specifically designed to be <strong>copied and pasted</strong> (vendorized) into your project. This avoids bloating your <code>package.json</code> with external dependencies for a relatively small utility.
+  </p>
+
+  <h2>How to Vendorize</h2>
+  <p>Follow these steps to include Tempo in your project:</p>
+
+  <ol class="steps steps-vertical">
+    <li class="step">
+      <div class="step-content">
+        <h3 class="font-bold">Locate the Source</h3>
+        <p>In the Tempo repository, find the <code>src/</code> directory.</p>
+      </div>
+    </li>
+    <li class="step">
+      <div class="step-content">
+        <h3 class="font-bold">Copy to Your Project</h3>
+        <p>Copy the contents of <code>src/</code> into a directory in your project (e.g., <code>src/utils/tempo/</code>).</p>
+      </div>
+    </li>
+    <li class="step">
+      <div class="step-content">
+        <h3 class="font-bold">Import and Use</h3>
+        <p>Import the <code>tempo</code> function from the entry point (usually <code>index.ts</code>).</p>
+      </div>
+    </li>
+  </ol>
+
+  <h2>File Structure</h2>
+  <p>The library is organized into cohesive modules:</p>
+  <ul>
+    <li><code>index.ts</code>: Main entry point and range logic.</li>
+    <li><code>parser.ts</code>: Natural language parsing logic.</li>
+    <li><code>utils.ts</code>: Pure utility functions (normalization, formatting).</li>
+    <li><code>types.ts</code>: TypeScript definitions.</li>
+  </ul>
+
+  <div class="alert alert-warning shadow-sm mt-8">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+    <div>
+      <h3 class="font-bold">Maintainer Note</h3>
+      <p>When vendorizing, remember to also copy the tests (<code>src/index.test.ts</code>) if you plan to modify the code locally. This ensures your changes don't introduce regressions.</p>
+    </div>
+  </div>
+</DocLayout>

@@ -1,0 +1,41 @@
+---
+import DocLayout from "../layouts/DocLayout.astro";
+---
+
+<DocLayout title="Getting Started">
+  <h1>Getting Started</h1>
+  
+  <p>
+    Since <strong>Tempo</strong> is designed to be vendorized, getting started is as simple as copying the source files into your project.
+  </p>
+
+  <h2>Prerequisites</h2>
+  <ul>
+    <li>Node.js (for building/testing)</li>
+    <li>TypeScript (recommended)</li>
+  </ul>
+
+  <h2>Basic Setup</h2>
+  <p>If you have the <code>tempo</code> repository locally, you can use the main function like this:</p>
+
+  <div class="mockup-code my-4">
+    <pre data-prefix="1"><code>import {"{ tempo }"} from './path/to/tempo';</code></pre>
+    <pre data-prefix="2"><code></code></pre>
+    <pre data-prefix="3"><code>// Parse a single date</code></pre>
+    <pre data-prefix="4"><code>const today = tempo('hoje');</code></pre>
+    <pre data-prefix="5"><code>console.log(today); // Output: 2026-05-09 (assuming today is May 9th)</code></pre>
+    <pre data-prefix="6"><code></code></pre>
+    <pre data-prefix="7"><code>// Parse a range</code></pre>
+    <pre data-prefix="8"><code>const range = tempo('hoje até amanhã');</code></pre>
+    <pre data-prefix="9"><code>console.log(range); // Output: 2026-05-09/2026-05-10</code></pre>
+  </div>
+
+  <h2>Configuration</h2>
+  <p>The <code>tempo</code> function accepts an optional configuration object:</p>
+  
+  <div class="mockup-code my-4">
+    <pre data-prefix="1"><code>const result = tempo('amanhã', {"{"}</code></pre>
+    <pre data-prefix="2"><code>  now: new Date('2026-01-01'), // Custom reference date</code></pre>
+    <pre data-prefix="3"><code>{"}"});</code></pre>
+  </div>
+</DocLayout>

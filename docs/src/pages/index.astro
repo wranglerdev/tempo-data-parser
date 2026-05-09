@@ -1,0 +1,34 @@
+---
+import DocLayout from "../layouts/DocLayout.astro";
+---
+
+<DocLayout title="Introduction">
+  <h1>Tempo</h1>
+  <p class="lead">
+    A lightweight, dependency-free TypeScript library to parse natural language (PT-BR) into dates and date ranges.
+  </p>
+  
+  <p>
+    <strong>Tempo</strong> (Portuguese for "Time") was built to handle human-readable date inputs like <em>"hoje"</em>, <em>"amanhã"</em>, <em>"próxima segunda"</em>, or <em>"de 01/01 até 10/01"</em> and convert them into standard ISO date formats or ranges.
+  </p>
+
+  <h2>Key Features</h2>
+  <ul>
+    <li><strong>Natural Language:</strong> Supports a wide variety of Portuguese expressions for dates and relative times.</li>
+    <li><strong>Range Support:</strong> Easily parses intervals (e.g., "hoje até amanhã").</li>
+    <li><strong>Zero Dependencies:</strong> Designed as a "pure" library that can be vendorized directly into your project.</li>
+    <li><strong>Type Safe:</strong> Built with TypeScript for full type safety and developer productivity.</li>
+  </ul>
+
+  <div class="alert alert-info shadow-sm mt-8">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    <span>Inspired by <strong>hot-date</strong>, Tempo aims to provide a similar intuitive experience for the Portuguese language.</span>
+  </div>
+
+  <h2>Supported Formats</h2>
+  <p>The library returns either a single date or a range in the following formats:</p>
+  <ul>
+    <li><strong>Single Date:</strong> <code>YYYY-MM-DD</code></li>
+    <li><strong>Interval/Range:</strong> <code>YYYY-MM-DD/YYYY-MM-DD</code></li>
+  </ul>
+</DocLayout>

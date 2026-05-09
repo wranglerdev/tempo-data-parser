@@ -1,0 +1,94 @@
+---
+import DocLayout from "../layouts/DocLayout.astro";
+---
+
+<DocLayout title="Usage Examples">
+  <h1>Usage Examples</h1>
+  
+  <p>
+    Explore common patterns and expressions supported by <strong>Tempo</strong>.
+  </p>
+
+  <h2>Single Dates</h2>
+  <p>Relative and absolute date expressions in PT-BR.</p>
+  
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Input</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>"hoje"</code></td>
+          <td>The current day</td>
+        </tr>
+        <tr>
+          <td><code>"amanhã"</code></td>
+          <td>The next day</td>
+        </tr>
+        <tr>
+          <td><code>"ontem"</code></td>
+          <td>The previous day</td>
+        </tr>
+        <tr>
+          <td><code>"daqui a 3 dias"</code></td>
+          <td>Three days in the future</td>
+        </tr>
+        <tr>
+          <td><code>"próxima segunda"</code></td>
+          <td>The coming Monday</td>
+        </tr>
+        <tr>
+          <td><code>"15 de janeiro"</code></td>
+          <td>January 15th of the current year</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="mt-10">Date Ranges</h2>
+  <p>Intervals between two dates.</p>
+
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Input</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>"hoje até amanhã"</code></td>
+          <td>Range from today to tomorrow</td>
+        </tr>
+        <tr>
+          <td><code>"de ontem a hoje"</code></td>
+          <td>Range from yesterday to today</td>
+        </tr>
+        <tr>
+          <td><code>"próxima semana"</code></td>
+          <td>Range covering the next 7 days</td>
+        </tr>
+        <tr>
+          <td><code>"mês que vem"</code></td>
+          <td>Range covering the entire next month</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="mt-10">Advanced Usage</h2>
+  <p>Handling errors and invalid inputs.</p>
+  
+  <div class="mockup-code my-4">
+    <pre data-prefix="1"><code>try {"{"}</code></pre>
+    <pre data-prefix="2"><code>  const result = tempo('data inválida');</code></pre>
+    <pre data-prefix="3"><code>{"}"} catch (e) {"{"}</code></pre>
+    <pre data-prefix="4"><code>  console.error("Could not parse date");</code></pre>
+    <pre data-prefix="5"><code>{"}"}</code></pre>
+  </div>
+</DocLayout>

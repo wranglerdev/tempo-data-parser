@@ -1,0 +1,144 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+
+const menuItems = [
+  { href: "/", label: "Introduction" },
+  { href: "/getting-started", label: "Getting Started" },
+  { href: "/manual-installation", label: "Manual Installation" },
+  { href: "/usage-examples", label: "Usage Examples" },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <title>{title} | Tempo Docs</title>
+    <script is:inline>
+      // Initialize theme before anything renders to prevent flash
+      const theme = (() => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+          return localStorage.getItem('theme');
+        }
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          return 'polar-dark';
+        }
+        return 'polar';
+      })();
+      document.documentElement.setAttribute('data-theme', theme);
+    </script>
+  </head>
+  <body class="font-sans antialiased bg-base-100 transition-colors duration-300">
+    <div class="drawer lg:drawer-open">
+      <input id="my-drawer" type="checkbox" class="drawer-toggle" />
+      <div class="drawer-content flex flex-col bg-base-100 min-h-screen">
+        <!-- Navbar -->
+        <div class="navbar bg-base-100/80 backdrop-blur-md sticky top-0 z-20 w-full border-b border-base-200 lg:hidden">
+          <div class="flex-none">
+            <label for="my-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </label>
+          </div>
+          <div class="flex-1 px-2 mx-2 font-semibold text-lg tracking-tight">Tempo</div>
+          <div class="flex-none">
+            <button id="theme-toggle-mobile" class="btn btn-ghost btn-circle" aria-label="Toggle theme">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-current sun-icon hidden"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-current moon-icon hidden"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Page content here -->
+        <main class="p-6 md:p-12 lg:p-16 max-w-4xl mx-auto w-full prose prose-slate prose-headings:font-semibold prose-headings:tracking-tight prose-a:text-primary prose-code:bg-base-200 prose-code:px-1 prose-code:py-0.5 prose-code:rounded-sm prose-code:before:content-none prose-code:after:content-none dark:prose-invert">
+          <slot />
+        </main>
+      </div>
+      <div class="drawer-side z-30">
+        <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+        <aside class="bg-base-100 w-72 min-h-full flex flex-col border-r border-base-200">
+          <div class="p-6 border-b border-base-200 flex items-center justify-between">
+            <h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
+              <span class="text-primary">Tempo</span>
+              <span class="text-[10px] font-mono py-0.5 px-1.5 bg-primary/10 text-primary rounded-full uppercase tracking-wider">v1.0.0</span>
+            </h1>
+            <button id="theme-toggle" class="btn btn-ghost btn-sm btn-circle" aria-label="Toggle theme">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-current sun-icon hidden"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-5 h-5 stroke-current moon-icon hidden"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+            </button>
+          </div>
+          <nav class="flex-1 overflow-y-auto p-4">
+            <ul class="menu menu-md gap-1">
+              {menuItems.map(item => (
+                <li>
+                  <a 
+                    href={item.href} 
+                    class={`rounded-lg px-4 py-2 hover:bg-base-200 transition-colors ${Astro.url.pathname === item.href ? "active bg-primary/10 text-primary font-medium hover:bg-primary/20" : "text-base-content/70 hover:text-base-content"}`}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          
+          <div class="p-6 mt-auto">
+            <div class="p-4 bg-base-200 rounded-xl text-xs text-base-content/60 leading-relaxed border border-base-300/50">
+              <p>A library to parse natural language dates in PT-BR with zero dependencies.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <script>
+      const themeToggle = document.getElementById('theme-toggle');
+      const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+      
+      console.log('Theme toggle script initialized');
+
+      const updateIcons = (theme: string) => {
+        const sunIcons = document.querySelectorAll('.sun-icon');
+        const moonIcons = document.querySelectorAll('.moon-icon');
+        
+        if (theme === 'polar-dark') {
+          sunIcons.forEach(i => i.classList.remove('hidden'));
+          moonIcons.forEach(i => i.classList.add('hidden'));
+        } else {
+          sunIcons.forEach(i => i.classList.add('hidden'));
+          moonIcons.forEach(i => i.classList.remove('hidden'));
+        }
+      };
+
+      const handleToggle = () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const nextTheme = currentTheme === 'polar' ? 'polar-dark' : 'polar';
+        
+        console.log('Toggling theme from', currentTheme, 'to', nextTheme);
+        
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        localStorage.setItem('theme', nextTheme);
+        updateIcons(nextTheme);
+      };
+
+      themeToggle?.addEventListener('click', handleToggle);
+      themeToggleMobile?.addEventListener('click', handleToggle);
+
+      // Initial icon state
+      const initialTheme = document.documentElement.getAttribute('data-theme') || 'polar';
+      updateIcons(initialTheme);
+    </script>
+  </body>
+</html>
