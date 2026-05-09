@@ -75,7 +75,7 @@ export function tempo(input: string, options: TempoOptions = {}): string | null 
     return `${ref.getFullYear()}-01-01/${toISODate(ref)}`;
   }
 
-  const rangeDelims = [/\s+ate\s+/, /\s+ao\s+/, /->/, /\.\.\.\./, /\.\.\./, /\.\./, /\s+pra\s+ca\b/, /\s+e\s+/, /\s*-\s*/, /\b\s+a\s+\b/];
+  const rangeDelims = [/\s+ate\s+/, /\s+ao\s+/, /->/, /\.\.\.\./, /\.\.\./, /\.\./, /\s+pra\s+ca\b/, /\s+pra\s+/, /\s+e\s+/, /\s*-\s*/, /\b\s+a\s+\b/];
 
   const rangeInput = normalizedInput.replace(/^(de|desde|dos|do|da|o|a)\s+/, '');
   

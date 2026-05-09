@@ -210,6 +210,19 @@ describe('Parser Tempo (PT-BR) - Suite Completa', () => {
     });
   });
 
+  describe('11. Novos Casos de Intervalos e "Pra"', () => {
+    test('intervalos usando "pra" como delimitador', () => {
+      expect(tempo('começo do ano pra março', { referenceDate: refDate })).toBe('2026-01-01/2026-03-01');
+      expect(tempo('janeiro pra março', { referenceDate: refDate })).toBe('2026-01-01/2026-03-01');
+      expect(tempo('segunda pra quarta', { referenceDate: refDate })).toBe('2026-05-11/2026-05-13');
+    });
+
+    test('começo do ano em diferentes combinações', () => {
+      expect(tempo('do começo do ano até agora', { referenceDate: refDate })).toBe('2026-01-01/2026-05-08');
+      expect(tempo('começo do ano até natal', { referenceDate: refDate })).toBe('2026-01-01/2026-12-25');
+    });
+  });
+
   describe('9. Casos Falhos ou Nulos', () => {
     test('Inputs inválidos devem retornar nulo', () => {
       expect(tempo('', { referenceDate: refDate })).toBeNull();
