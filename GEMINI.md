@@ -17,6 +17,15 @@ A estrutura de arquivos foi separada na pasta `src/` para ser bastante coesa e m
 **Como usar num projeto novo:**
 Basta copiar a pasta `src` (ou os arquivos dela) para dentro do projeto destino (por exemplo: `utils/tempo/`) e importar a função.
 
+## Princípios de Desenvolvimento e Qualidade
+
+Para garantir a confiabilidade e facilidade de manutenção, o projeto adota padrões rigorosos:
+
+- **Type Safety Total:** É terminantemente proibido o uso de `any` ou *non-null assertions* (`!`). Todo o código deve ser estritamente tipado.
+- **Segurança em Operações de String:** Capturas de Regex e acessos a arrays/objetos devem sempre ser protegidos por *Type Guards* ou verificações de existência (ex: `if (match && match[1])`).
+- **Padrão de Saída:** O formato final deve ser sempre `YYYY-MM-DD` (Data Única) ou `YYYY-MM-DD/YYYY-MM-DD` (Intervalo).
+- **Sem Dependências Externas:** A biblioteca deve permanecer "pure JS/TS", facilitando a vendorização sem poluir o `package.json` do projeto destino.
+
 ## Inspiração e Evolução: hot-date
 
 Para enriquecer as capacidades do `tempo`, utilizamos a excelente biblioteca web [hot-date](https://github.com/stolinski/hot-date) como base de inspiração e referência funcional.

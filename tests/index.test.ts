@@ -1,4 +1,4 @@
-import { tempo } from './index';
+import { tempo } from '../src/index';
 
 describe('Parser Tempo (PT-BR) - Suite Completa', () => {
   // Data base fixa para garantir consistência: 2026-05-08 (Sexta-feira)

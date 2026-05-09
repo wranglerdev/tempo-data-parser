@@ -5,11 +5,15 @@ Uma biblioteca leve e modular para interpretação de linguagem natural em portu
 ## 🚀 Funcionalidades
 
 - **Linguagem Natural PT-BR:** Entende expressões como "hoje", "amanhã", "ontem", "daqui a 3 dias", "mês passado", etc.
-- **Intervalos (Ranges):** Suporte a "segunda até sexta", "natal ... ano novo", "últimos 7 dias".
-- **Aritmética de Datas:** "hoje + 3 dias", "ontem - 1 semana".
-- **Datas Fixas e Feriados:** "natal", "páscoa", "carnaval", "dia das mães".
-- **Resiliência:** Tolerância a erros de digitação (fuzzy matching) e abreviações (fds, hj).
-- **Sem Dependências:** Construído puramente com TypeScript/JavaScript.
+- **Intervalos (Ranges):** Suporte a "segunda até sexta", "natal ... ano novo", "últimos 7 dias", "carnaval até páscoa".
+- **Aritmética de Datas:** Resoluções complexas como "hoje + 3 dias", "ontem - 1 semana" ou até "fim de semana + 1 semana".
+- **Composições Relativas:** Interpreta âncoras como "segunda antes do fim do mês" ou "domingo depois do dia das mães".
+- **Datas Fixas e Feriados:** Suporte completo a **feriados bancários brasileiros** (Natal, Tiradentes, Corpus Christi, etc) e feriados móveis (Páscoa, Carnaval).
+- **Resiliência Extrema:** 
+  - **Fuzzy Matching:** Tolera erros como `jantiro` (janeiro) ou `reveilon`.
+  - **Remoção de Ruído:** Ignora palavras inúteis como "lá pra uns", "tipo", "aconteceu", "foi".
+  - **Gírias/Abreviações:** Entende `hj`, `fds`, `agra`, `atraz`.
+- **Sem Dependências:** Construído puramente com TypeScript/JavaScript, ideal para vendorização rápida.
 
 ## 📦 Instalação
 
@@ -29,11 +33,21 @@ const data = tempo('amanhã');
 
 | Entrada | Resultado (Exemplo) |
 | :--- | :--- |
-| `hoje` | `2026-05-09` |
-| `daqui a 2 semanas` | `2026-05-23` |
-| `segunda antes do natal` | `2026-12-21` |
-| `últimos 7 dias` | `2026-05-02/2026-05-09` |
-| `fds` | `2026-05-09/2026-05-10` |
+| `hoje + 3 dias` | `2026-05-12` |
+| `lá pra uns 2 meses atrás` | `2026-03-09` |
+| `segunda antes do fim do mes` | `2026-05-25` |
+| `3 semanas depois de amanha` | `2026-05-31` |
+| `fds + 1 semana` | `2026-05-16/2026-05-17` |
+| `janiero 15` (typo!) | `2026-01-15` |
+| `da semana passada pra ca` | `2026-05-02/2026-05-09` |
+| `do começo do ano até agora` | `2026-01-01/2026-05-09` |
+| `natal ... reveillon` | `2026-12-25/2026-12-31` |
+| `sexta antes do natal` | `2026-12-18` |
+| `3 dias antes do natal até natal` | `2026-12-22/2026-12-25` |
+| `tem 1 mes` | `2026-04-09` |
+| `meados do mês passado` | `2026-04-15` |
+| `vinte e um de maio` | `2026-05-21` |
+| `ano retrasado` | `2024-01-01/2024-12-31` |
 
 ---
 

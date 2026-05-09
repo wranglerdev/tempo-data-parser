@@ -1,4 +1,4 @@
-import { tempo } from './index';
+import { tempo } from '../src/index';
 
 describe('Tempo (PT-BR) - Red Tests (Casos Desejados)', () => {
   // Data base: 2026-05-09 (Sábado)

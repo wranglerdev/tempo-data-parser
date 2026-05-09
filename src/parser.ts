@@ -3,14 +3,16 @@ import { toISODate, daysOfWeek, meses, mesesAbrev, calculateEaster } from './uti
 export function parseSingleDate(input: string, ref: Date, contextDate?: Date): string | null {
   let mathVal = 0;
   let mathUnit: string | undefined;
-  let cleanInput = input;
+  
+  // Cleanup for components
+  let cleanInput = input.replace(/\b(?:mesmo|msm|ja|foi|aconteceu|la|ai|pouco|noite|cedo|tarde|manha|uns|os|as)\b/g, ' ').replace(/\s+/g, ' ').trim();
 
-  const mathMatch = input.match(/\s+([+-]|mais|menos)\s*(\d+)(?:\s*(dia|semana|mes|ano)(?:es|s)?)?$/);
-  if (mathMatch) {
+  const mathMatch = cleanInput.match(/\s+([+-]|mais|menos)\s*(\d+)(?:\s*(dia|semana|mes|ano)(?:es|s)?)?$/);
+  if (mathMatch && mathMatch[1] && mathMatch[2]) {
     const op = (mathMatch[1] === '+' || mathMatch[1] === 'mais') ? 1 : -1;
-    mathVal = parseInt(mathMatch[2]!) * op;
+    mathVal = parseInt(mathMatch[2]) * op;
     mathUnit = mathMatch[3] || 'dia';
-    cleanInput = input.replace(mathMatch[0], '').trim();
+    cleanInput = cleanInput.replace(mathMatch[0], '').trim();
   }
 
   const date = getBaseDate(cleanInput, ref, contextDate);
@@ -30,120 +32,165 @@ export function parseSingleDate(input: string, ref: Date, contextDate?: Date): s
 function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null {
   const date = new Date(ref);
   const baseYear = (contextDate || date).getFullYear();
+  
+  const clean = input
+    .replace(/[\-\.\/]/g, ' ')
+    .replace(/\b(?:o|a|os|as|de|do|da|dos|das|no|na|em|pra|uns|tipo|mais|que)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
-  if (input === 'hoje' || input === 'agora' || input === 'atras') return date;
-  if (input === 'amanha') return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
-  if (input === 'ontem') return new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1);
-  if (input === 'anteontem' || input === 'o dia antes de ontem') return new Date(date.getFullYear(), date.getMonth(), date.getDate() - 2);
-  if (input === 'depois de amanha') return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 2);
+  if (clean === 'hoje' || clean === 'agora' || clean === 'atras') return date;
+  if (clean === 'amanha') return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+  if (clean === 'ontem') return new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1);
+  if (clean === 'anteontem' || clean === 'dia antes ontem') return new Date(date.getFullYear(), date.getMonth(), date.getDate() - 2);
+  if (clean === 'depois amanha' || clean === 'depois de amanha') return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 2);
 
-  if (input.startsWith('meados de ')) {
-    const d = getBaseDate(input.replace('meados de ', ''), ref, contextDate);
+  // 2. Relativos Complexos
+  const relRegex = /^(.*?)\s+(antes|depois)\s+(.*)$/;
+  const relMatch = clean.match(relRegex);
+  if (relMatch && relMatch[1] && relMatch[2] && relMatch[3]) {
+    const subject = relMatch[1].trim();
+    const relation = relMatch[2];
+    const anchor = relMatch[3].trim();
+    const anchorDateStr = parseSingleDate(anchor, ref, contextDate);
+    if (anchorDateStr) {
+      const anchorDate = new Date(anchorDateStr + 'T12:00:00');
+      let resDate: Date | null = null;
+      for (const [name, dow] of Object.entries(daysOfWeek)) {
+        if (new RegExp(`\\b${name}\\b`).test(subject)) {
+          resDate = new Date(anchorDate);
+          const currentDow = resDate.getDay(); let diff = dow - currentDow;
+          resDate.setDate(resDate.getDate() + diff);
+          if (relation === 'antes' && diff >= 0) resDate.setDate(resDate.getDate() - 7);
+          if (relation === 'depois' && diff <= 0) resDate.setDate(resDate.getDate() + 7);
+          return resDate;
+        }
+      }
+      if (!resDate) {
+         const mathPrefixMatch = subject.match(/^(\d+)\s+(dia|semana|mes|ano)(?:es|s)?$/);
+         if (mathPrefixMatch && mathPrefixMatch[1] && mathPrefixMatch[2]) {
+            const amount = parseInt(mathPrefixMatch[1]); const unit = mathPrefixMatch[2];
+            const mult = relation === 'antes' ? -1 : 1;
+            const rd = new Date(anchorDate);
+            if (unit === 'dia') rd.setDate(rd.getDate() + amount * mult);
+            else if (unit === 'semana') rd.setDate(rd.getDate() + amount * 7 * mult);
+            else if (unit === 'mes') rd.setMonth(rd.getMonth() + amount * mult);
+            else if (unit === 'ano') rd.setFullYear(rd.getFullYear() + amount * mult);
+            return rd;
+         }
+         resDate = getBaseDate(subject, anchorDate, anchorDate);
+      }
+      if (resDate) {
+        if (relation === 'antes' && resDate.getTime() >= anchorDate.getTime()) resDate.setDate(resDate.getDate() - 7);
+        if (relation === 'depois' && resDate.getTime() <= anchorDate.getTime()) resDate.setDate(resDate.getDate() + 7);
+        return resDate;
+      }
+    }
+  }
+
+  // 3. Feriados
+  const holidayMap: Record<string, () => Date> = {
+    'vespera natal': () => new Date(baseYear, 11, 24),
+    'confraternizacao universal': () => new Date(baseYear, 0, 1),
+    'sexta feira santa': () => { const d = calculateEaster(baseYear); d.setDate(d.getDate() - 2); return d; },
+    'sexta feira paixao': () => { const d = calculateEaster(baseYear); d.setDate(d.getDate() - 2); return d; },
+    'segunda feira carnaval': () => { const d = calculateEaster(baseYear); d.setDate(d.getDate() - 48); return d; },
+    'segunda carnaval': () => { const d = calculateEaster(baseYear); d.setDate(d.getDate() - 48); return d; },
+    'terca feira carnaval': () => { const d = calculateEaster(baseYear); d.setDate(d.getDate() - 47); return d; },
+    'terca carnaval': () => { const d = calculateEaster(baseYear); d.setDate(d.getDate() - 47); return d; },
+    'nossa senhora aparecida': () => new Date(baseYear, 9, 12),
+    'proclamacao republica': () => new Date(baseYear, 10, 15),
+    'consciencia negra': () => new Date(baseYear, 10, 20),
+    'dia trabalhador': () => new Date(baseYear, 4, 1),
+    'dia trabalho': () => new Date(baseYear, 4, 1),
+    'virada ano': () => new Date(baseYear, 11, 31),
+    'corpus christi': () => { const d = calculateEaster(baseYear); d.setDate(d.getDate() + 60); return d; },
+    'independencia': () => new Date(baseYear, 8, 7),
+    'sete setembro': () => new Date(baseYear, 8, 7),
+    'aparecida': () => new Date(baseYear, 9, 12),
+    'doze outubro': () => new Date(baseYear, 9, 12),
+    'republica': () => new Date(baseYear, 10, 15),
+    'dia maes': () => { const d = new Date(baseYear, 4, 1); const dow = d.getDay(); d.setDate(1 + (dow === 0 ? 7 : (7 - dow) + 7)); return d; },
+    'dia pais': () => { const d = new Date(baseYear, 7, 1); const dow = d.getDay(); d.setDate(1 + (dow === 0 ? 7 : (7 - dow) + 7)); return d; },
+    'natal': () => new Date(baseYear, 11, 25),
+    'reveillon': () => new Date(baseYear, 11, 31),
+    'ano novo': () => new Date(baseYear, 0, 1),
+    'pascoa': () => calculateEaster(baseYear),
+    'sexta paixao': () => { const d = calculateEaster(baseYear); d.setDate(d.getDate() - 2); return d; },
+    'carnaval': () => { const d = calculateEaster(baseYear); d.setDate(d.getDate() - 47); return d; },
+    'tiradentes': () => new Date(baseYear, 3, 21),
+    'finados': () => new Date(baseYear, 10, 2)
+  };
+  const sortedHolidays = Object.keys(holidayMap).sort((a, b) => b.length - a.length);
+  for (const key of sortedHolidays) {
+    if (clean.includes(key)) {
+      const fn = holidayMap[key];
+      if (fn) return fn();
+    }
+  }
+
+  // 4. Meados
+  if (clean.startsWith('meados ')) {
+    const d = getBaseDate(clean.replace('meados ', ''), ref, contextDate);
     if (d) { d.setDate(15); return d; }
   }
 
-  if (/^\d{1,2}$/.test(input) && contextDate) {
-    const d = new Date(contextDate); d.setDate(parseInt(input));
-    if (d.getDate() !== parseInt(input)) return null;
-    return d;
-  }
-  
-  const diaMatch = input.match(/^(?:o\s+)?dia\s+(\d{1,2})$/);
-  if (diaMatch) {
-    const d = new Date(date); d.setDate(parseInt(diaMatch[1]!));
-    if (d.getDate() === parseInt(diaMatch[1]!)) return d;
-  }
-
-  if (input === 'mes passado') return new Date(date.getFullYear(), date.getMonth() - 1, 1);
-  if (input === 'mes retrasado') return new Date(date.getFullYear(), date.getMonth() - 2, 1);
-  if (input === 'proximo mes' || input === 'mes que vem') return new Date(date.getFullYear(), date.getMonth() + 1, 1);
-  if (input === 'este mes' || input === 'neste mes' || input === 'mes') return date;
-
-  if (input === 'ano passado') return new Date(date.getFullYear() - 1, 0, 1);
-  if (input === 'ano que vem') return new Date(date.getFullYear() + 1, 0, 1);
-  if (input === 'este ano' || input === 'neste ano' || input === 'ano') return new Date(date.getFullYear(), 0, 1);
-
-  if (input === 'semana passada') { const d = new Date(date); d.setDate(d.getDate() - (d.getDay() || 7)); return d; }
-  if (input === 'proxima semana' || input === 'semana que vem') { const d = new Date(date); d.setDate(d.getDate() + (8 - (d.getDay() || 7))); return d; }
-  if (input === 'esta semana' || input === 'semana') { const d = new Date(date); d.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1)); return d; }
-
-  if (input === 'fim de semana' || input === 'fds') { const d = new Date(date); d.setDate(d.getDate() + (d.getDay() === 0 ? 0 : 7 - d.getDay())); return d; }
-
-  if (input === 'natal' || input === 'no natal') return new Date(baseYear, 11, 25);
-  if (input === 'vespera de natal') return new Date(baseYear, 11, 24);
-  if (input === 'reveillon' || input === 'na virada do ano') return new Date(baseYear, 11, 31);
-  if (input === 'ano novo') return new Date(baseYear, 0, 1);
-  if (input === 'pascoa') return calculateEaster(baseYear);
-  if (input === 'carnaval') { const d = calculateEaster(baseYear); d.setDate(d.getDate() - 47); return d; }
-  if (input === 'dia das maes') { const d = new Date(baseYear, 4, 1); const dow = d.getDay(); d.setDate(1 + (dow === 0 ? 7 : (7 - dow) + 7)); return d; }
-  if (input === 'dia dos pais') { const d = new Date(baseYear, 7, 1); const dow = d.getDay(); d.setDate(1 + (dow === 0 ? 7 : (7 - dow) + 7)); return d; }
-
-  const startRegex = /^(inicio|comeco|fim|final|final do|fim do|inicio do|comeco do)\s+(do|de|da)\s+/;
-  const startMatch = input.match(startRegex);
-  if (startMatch) {
+  // 5. Período
+  const startRegex = /^(inicio|comeco|fim|final)\s+/;
+  const startMatch = clean.match(startRegex);
+  if (startMatch && startMatch[1]) {
     const type = startMatch[1];
-    const clean = input.replace(startRegex, '');
-    if (clean === 'ano') {
+    const cleanPart = clean.replace(startRegex, '').trim();
+    if (cleanPart === 'ano') {
        if (type.startsWith('fim') || type.startsWith('final')) return new Date(baseYear, 11, 31);
        return new Date(baseYear, 0, 1);
     }
-    if (clean === 'semana') {
+    if (cleanPart === 'semana') {
        const d = new Date(date); d.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1));
        if (type.startsWith('fim') || type.startsWith('final')) d.setDate(d.getDate() + 6);
        return d;
     }
-    const d = getBaseDate(clean, ref, contextDate);
+    const d = getBaseDate(cleanPart, ref, contextDate);
     if (d) {
       if (type.startsWith('inicio') || type.startsWith('comeco')) { d.setDate(1); return d; }
       else { d.setMonth(d.getMonth() + 1); d.setDate(0); return d; }
     }
   }
 
-  // Handle "X antes/depois de Y"
-  const relRegex = /^(.*?)\s+(antes|depois)\s+(?:do|de|da)\s+(.*)$/;
-  const relMatch = input.match(relRegex);
-  if (relMatch) {
-    const subject = relMatch[1]!.trim();
-    const relation = relMatch[2];
-    const anchor = relMatch[3]!.trim();
-    const anchorDateStr = parseSingleDate(anchor, ref, contextDate);
-    if (anchorDateStr) {
-      const anchorDate = new Date(anchorDateStr + 'T12:00:00');
-      // If subject is just a day of week, we want it relative to anchor without the default jump
-      let res: Date | null = null;
-      for (const [name, dow] of Object.entries(daysOfWeek)) {
-        if (new RegExp(`\\b${name}\\b`).test(subject)) {
-          res = new Date(anchorDate);
-          const currentDow = res.getDay(); let diff = dow - currentDow;
-          res.setDate(res.getDate() + diff);
-          break;
-        }
-      }
-      if (!res) res = getBaseDate(subject, anchorDate, anchorDate);
-
-      if (res) {
-        if (relation === 'antes' && res.getTime() >= anchorDate.getTime()) res.setDate(res.getDate() - 7);
-        if (relation === 'depois' && res.getTime() <= anchorDate.getTime()) res.setDate(res.getDate() + 7);
-        return res;
-      }
-      const mathPrefixMatch = subject.match(/^(\d+)\s+(dia|semana|mes|ano)(?:es|s)?$/);
-      if (mathPrefixMatch) {
-         const amount = parseInt(mathPrefixMatch[1]!); const unit = mathPrefixMatch[2]!;
-         const mult = relation === 'antes' ? -1 : 1;
-         const resDate = new Date(anchorDate);
-         if (unit === 'dia') resDate.setDate(resDate.getDate() + amount * mult);
-         else if (unit === 'semana') resDate.setDate(resDate.getDate() + amount * 7 * mult);
-         else if (unit === 'mes') resDate.setMonth(resDate.getMonth() + amount * mult);
-         else if (unit === 'ano') resDate.setFullYear(resDate.getFullYear() + amount * mult);
-         return resDate;
-      }
-    }
+  // 6. Números Diretos
+  if (/^\d{1,2}$/.test(clean)) {
+    const d = new Date(contextDate || date); d.setDate(parseInt(clean));
+    if (d.getDate() !== parseInt(clean)) return null;
+    return d;
+  }
+  const diaMatch = clean.match(/^(?:dia\s+)?(\d{1,2})$/);
+  if (diaMatch && diaMatch[1]) {
+    const d = new Date(date); d.setDate(parseInt(diaMatch[1]));
+    if (d.getDate() === parseInt(diaMatch[1])) return d;
   }
 
-  const prefixRelMatch = input.match(/^(?:daqui a|\bem\b|ha|faz|tem|uns|ultimos?)\s+(?:uns\s+)?(\d+)\s+(dia|semana|mes|ano)(?:es|s)?/);
-  if (prefixRelMatch) {
-    const amount = parseInt(prefixRelMatch[1]!); const unit = prefixRelMatch[2]!;
-    const mult = (input.includes('daqui a') || /\bem\b/.test(input)) ? 1 : -1;
+  // 7. Simples
+  if (clean === 'mes passado') return new Date(date.getFullYear(), date.getMonth() - 1, 1);
+  if (clean === 'mes retrasado') return new Date(date.getFullYear(), date.getMonth() - 2, 1);
+  if (clean === 'proximo mes' || clean === 'mes vem' || clean === 'mes que vem') return new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  if (clean === 'este mes' || clean === 'neste mes' || clean === 'mes') return date;
+  if (clean === 'ano passado') return new Date(date.getFullYear() - 1, 0, 1);
+  if (clean === 'ano vem' || clean === 'ano que vem') return new Date(date.getFullYear() + 1, 0, 1);
+  if (clean === 'ano retrasado') return new Date(date.getFullYear() - 2, 0, 1);
+  if (clean === 'este ano' || clean === 'neste ano' || clean === 'ano') return new Date(date.getFullYear(), 0, 1);
+
+  // 8. Semanas
+  if (clean === 'semana passada') { const d = new Date(date); d.setDate(d.getDate() - 7); return d; }
+  if (clean === 'semana retrasada') { const d = new Date(date); d.setDate(d.getDate() - 14); return d; }
+  if (clean === 'proxima semana' || clean === 'semana vem' || clean === 'semana que vem') { const d = new Date(date); d.setDate(d.getDate() + 7); return d; }
+  if (clean === 'esta semana' || clean === 'semana') { const d = new Date(date); d.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1)); return d; }
+  if (clean === 'fim semana' || clean === 'fds' || clean === 'fim de semana') { const d = new Date(date); d.setDate(d.getDate() + (d.getDay() === 0 ? 0 : 7 - d.getDay())); return d; }
+
+  // 9. Prefixos
+  const prefixRelMatch = input.match(/^(?:daqui|\bem\s+a\b|\bem\s+de\b|\bem\b|\bha\b|\bfaz\b|\btem\b|ultimos?)\s+(?:a\s+|de\s+)?(\d+)\s+(dia|semana|mes|ano)(?:es|s)?/);
+  if (prefixRelMatch && prefixRelMatch[1] && prefixRelMatch[2]) {
+    const amount = parseInt(prefixRelMatch[1]); const unit = prefixRelMatch[2];
+    const mult = (input.includes('daqui') || /\bem\b/.test(input)) ? 1 : -1;
     const res = new Date(date);
     if (unit === 'dia') res.setDate(res.getDate() + amount * mult);
     else if (unit === 'semana') res.setDate(res.getDate() + amount * 7 * mult);
@@ -151,10 +198,9 @@ function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null 
     else if (unit === 'ano') res.setFullYear(res.getFullYear() + amount * mult);
     return res;
   }
-
-  const suffixRelMatch = input.match(/^(\d+)\s+(dia|semana|mes|ano)(?:es|s)?\s+(atras|pra tras)/);
-  if (suffixRelMatch) {
-    const amount = parseInt(suffixRelMatch[1]!); const unit = suffixRelMatch[2]!;
+  const suffixRelMatch = clean.match(/^(\d+)\s+(dia|semana|mes|ano)(?:es|s)?\s+(atras|pra tras)/);
+  if (suffixRelMatch && suffixRelMatch[1] && suffixRelMatch[2]) {
+    const amount = parseInt(suffixRelMatch[1]); const unit = suffixRelMatch[2];
     const res = new Date(date);
     if (unit === 'dia') res.setDate(res.getDate() - amount);
     else if (unit === 'semana') res.setDate(res.getDate() - amount * 7);
@@ -163,46 +209,54 @@ function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null 
     return res;
   }
 
+  // 10. Dias Semana
   for (const [name, dow] of Object.entries(daysOfWeek)) {
-    const regex = new RegExp(`\\b${name}\\b`);
-    if (regex.test(input)) {
+    if (new RegExp(`\\b${name}\\b`).test(clean)) {
       const res = new Date(date);
       const currentDow = res.getDay(); let diff = dow - currentDow;
-      if (input.includes('proximo')) { if (diff <= 0) diff += 7; }
-      else if (input.includes('retrasad')) { if (diff >= 0) diff -= 14; else diff -= 7; }
-      else if (input.includes('passad')) { if (diff >= 0) diff -= 7; }
+      if (clean.includes('proximo')) { if (diff <= 0) diff += 7; }
+      else if (clean.includes('retrasad')) { if (diff >= 0) diff -= 14; else diff -= 7; }
+      else if (clean.includes('passad')) { if (diff >= 0) diff -= 7; }
+      else if (input.includes('esse') || input.includes('este')) { if (diff < 0) diff += 7; }
       else if (!input.includes('esta') && diff <= 0) diff += 7;
       res.setDate(res.getDate() + diff); return res;
     }
   }
 
-  const ddmmyyyy = input.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
-  if (ddmmyyyy) {
-    const d = parseInt(ddmmyyyy[1]!); const m = parseInt(ddmmyyyy[2]!) - 1;
+  const yyyymmdd = clean.match(/^(\d{4}) (\d{1,2}) (\d{1,2})$/);
+  if (yyyymmdd && yyyymmdd[1] && yyyymmdd[2] && yyyymmdd[3]) {
+    const y = parseInt(yyyymmdd[1]); const m = parseInt(yyyymmdd[2]) - 1; const d = parseInt(yyyymmdd[3]);
+    const res = new Date(y, m, d); if (res.getDate() === d) return res;
+  }
+  const ddmmyyyy = clean.match(/^(\d{1,2}) (\d{1,2})(?: (\d{2,4}))?$/);
+  if (ddmmyyyy && ddmmyyyy[1] && ddmmyyyy[2]) {
+    const d = parseInt(ddmmyyyy[1]); const m = parseInt(ddmmyyyy[2]) - 1;
     let y = ddmmyyyy[3] ? parseInt(ddmmyyyy[3]) : date.getFullYear(); if (y < 100) y += 2000;
     const res = new Date(y, m, d); if (res.getDate() === d) return res;
+  }
+  const yyyymm = clean.match(/^(\d{4}) (\d{1,2})$/);
+  if (yyyymm && yyyymm[1] && yyyymm[2]) {
+    const y = parseInt(yyyymm[1]); const m = parseInt(yyyymm[2]) - 1;
+    return new Date(y, m, 1);
   }
 
   for (let i = 0; i < 12; i++) {
     const regex = new RegExp(`\\b(?:${meses[i]}|${mesesAbrev[i]})\\b`);
-    if (regex.test(input)) {
-      const n = input.match(/\b\d+\b/g); 
-      let d = 1;
-      let y = baseYear;
-      let foundDay = false;
+    if (regex.test(clean)) {
+      const n = clean.match(/\b\d+\b/g); 
+      let d = 1; let y = baseYear; let foundDay = false;
       if (n) {
          for (const numStr of n) {
             const num = parseInt(numStr);
-            if (num >= 1900 && num <= 2200) y = num;
+            if (num >= 1950 && num <= 2200) y = num;
             else if (num <= 31 && !foundDay) { d = num; foundDay = true; }
             else if (num < 100 && y === baseYear && numStr.length === 2 && foundDay) y = 2000 + num;
-            else if (num > 31) return null; // Invalid day
+            else if (num > 31) return null;
          }
       }
       const res = new Date(y, i, d); if (res.getDate() === d) return res;
       return null;
     }
   }
-
   return null;
 }
