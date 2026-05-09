@@ -1,52 +1,78 @@
 ---
 import DocLayout from "../layouts/DocLayout.astro";
+import { Code } from 'astro:components';
+
+// Importando o conteúdo real dos arquivos para garantir que a doc reflita o código atual
+import indexCode from "../../../src/index.ts?raw";
+import parserCode from "../../../src/parser.ts?raw";
+import utilsCode from "../../../src/utils.ts?raw";
+import typesCode from "../../../src/types.ts?raw";
+
+const files = [
+  {
+    name: "types.ts",
+    description: "Contém as interfaces e definições de tipos utilizadas em toda a biblioteca.",
+    code: typesCode,
+  },
+  {
+    name: "utils.ts",
+    description: "Funções utilitárias puras para normalização de strings, dicionários de meses e feriados.",
+    code: utilsCode,
+  },
+  {
+    name: "parser.ts",
+    description: "O motor principal que interpreta as expressões em português e as converte em objetos Date.",
+    code: parserCode,
+  },
+  {
+    name: "index.ts",
+    description: "Ponto de entrada principal. Gerencia a lógica de intervalos (range) e expõe a função `tempo`.",
+    code: indexCode,
+  },
+];
 ---
 
-<DocLayout title="Manual Installation">
-  <h1>Manual Installation (Vendorizing)</h1>
+<DocLayout title="Instalação Manual">
+  <h1>Instalação Manual (Vendorização)</h1>
   
   <p>
-    <strong>Tempo</strong> was specifically designed to be <strong>copied and pasted</strong> (vendorized) into your project. This avoids bloating your <code>package.json</code> with external dependencies for a relatively small utility.
+    O <strong>Tempo</strong> foi projetado especificamente para ser <strong>copiado e colado</strong> (vendorizado) no seu projeto. Isso evita inchar o seu <code>package.json</code> com dependências externas para uma utilidade relativamente pequena.
   </p>
 
-  <h2>How to Vendorize</h2>
-  <p>Follow these steps to include Tempo in your project:</p>
-
-  <ol class="steps steps-vertical">
-    <li class="step">
-      <div class="step-content">
-        <h3 class="font-bold">Locate the Source</h3>
-        <p>In the Tempo repository, find the <code>src/</code> directory.</p>
-      </div>
-    </li>
-    <li class="step">
-      <div class="step-content">
-        <h3 class="font-bold">Copy to Your Project</h3>
-        <p>Copy the contents of <code>src/</code> into a directory in your project (e.g., <code>src/utils/tempo/</code>).</p>
-      </div>
-    </li>
-    <li class="step">
-      <div class="step-content">
-        <h3 class="font-bold">Import and Use</h3>
-        <p>Import the <code>tempo</code> function from the entry point (usually <code>index.ts</code>).</p>
-      </div>
-    </li>
-  </ol>
-
-  <h2>File Structure</h2>
-  <p>The library is organized into cohesive modules:</p>
+  <h2>Pré-requisitos</h2>
+  <p>Antes de começar, certifique-se de que seu projeto atenda aos seguintes requisitos:</p>
   <ul>
-    <li><code>index.ts</code>: Main entry point and range logic.</li>
-    <li><code>parser.ts</code>: Natural language parsing logic.</li>
-    <li><code>utils.ts</code>: Pure utility functions (normalization, formatting).</li>
-    <li><code>types.ts</code>: TypeScript definitions.</li>
+    <li><strong>TypeScript:</strong> O projeto deve estar configurado para suportar TypeScript (arquivo <code>tsconfig.json</code> presente e configurado).</li>
+    <li><strong>Node.js:</strong> Versão estável instalada (recomendado >= 18).</li>
   </ul>
 
-  <div class="alert alert-warning shadow-sm mt-8">
+  <h2>Como Vendorizar</h2>
+  <p>Para incluir o Tempo no seu projeto, basta criar uma pasta (por exemplo: <code>src/utils/tempo/</code>) e criar os quatro arquivos abaixo copiando o conteúdo real de cada um.</p>
+
+  {files.map((file) => (
+    <div class="mt-12">
+      <h3 class="font-bold text-xl flex items-center gap-2">
+        <span class="badge badge-primary font-mono">{file.name}</span>
+      </h3>
+      <p class="mt-2 text-base-content/70">{file.description}</p>
+      
+      <div class="mockup-code mt-4 max-h-[500px] overflow-auto relative group not-prose">
+        <button 
+          class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+          onclick={`navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('${file.name} copiado!')`}
+        >
+          Copiar
+        </button>
+        <Code code={file.code} lang="ts" theme="nord" class="bg-transparent! px-5" />
+      </div>
+    </div>
+  ))}
+
+  <div class="alert alert-warning shadow-sm mt-16">
     <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
     <div>
-      <h3 class="font-bold">Maintainer Note</h3>
-      <p>When vendorizing, remember to also copy the tests (<code>src/index.test.ts</code>) if you plan to modify the code locally. This ensures your changes don't introduce regressions.</p>
+      <h3 class="font-bold">Nota de Manutenção</h3>
+      <p>Os blocos de código acima são importados diretamente do código-fonte original do projeto. Qualquer atualização na biblioteca será refletida automaticamente nesta página.</p>
     </div>
   </div>
 </DocLayout>

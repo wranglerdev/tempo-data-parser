@@ -1,41 +1,58 @@
 ---
 import DocLayout from "../layouts/DocLayout.astro";
+import { Code } from 'astro:components';
+
+const importSnippet = `import { tempo } from './caminho/para/tempo';
+
+// Interpretar uma data única
+const hoje = tempo('hoje');
+console.log(hoje); // Saída: 2026-05-09 (assumindo que hoje é 9 de maio)
+
+// Interpretar um intervalo
+const range = tempo('hoje até amanhã');
+console.log(range); // Saída: 2026-05-09/2026-05-10`;
+
+const configSnippet = `const resultado = tempo('amanhã', {
+  now: new Date('2026-01-01'), // Data de referência personalizada
+});`;
 ---
 
-<DocLayout title="Getting Started">
-  <h1>Getting Started</h1>
+<DocLayout title="Primeiros Passos">
+  <h1>Primeiros Passos</h1>
   
   <p>
-    Since <strong>Tempo</strong> is designed to be vendorized, getting started is as simple as copying the source files into your project.
+    Como o <strong>Tempo</strong> foi projetado para ser vendorizado, começar é tão simples quanto copiar os arquivos fonte para o seu projeto.
   </p>
 
-  <h2>Prerequisites</h2>
+  <h2>Pré-requisitos</h2>
   <ul>
-    <li>Node.js (for building/testing)</li>
-    <li>TypeScript (recommended)</li>
+    <li>Node.js (para compilação/testes)</li>
+    <li>TypeScript (recomendado)</li>
   </ul>
 
-  <h2>Basic Setup</h2>
-  <p>If you have the <code>tempo</code> repository locally, you can use the main function like this:</p>
+  <h2>Configuração Básica</h2>
+  <p>Se você tem o repositório do <code>tempo</code> localmente, pode usar a função principal assim:</p>
 
-  <div class="mockup-code my-4">
-    <pre data-prefix="1"><code>import {"{ tempo }"} from './path/to/tempo';</code></pre>
-    <pre data-prefix="2"><code></code></pre>
-    <pre data-prefix="3"><code>// Parse a single date</code></pre>
-    <pre data-prefix="4"><code>const today = tempo('hoje');</code></pre>
-    <pre data-prefix="5"><code>console.log(today); // Output: 2026-05-09 (assuming today is May 9th)</code></pre>
-    <pre data-prefix="6"><code></code></pre>
-    <pre data-prefix="7"><code>// Parse a range</code></pre>
-    <pre data-prefix="8"><code>const range = tempo('hoje até amanhã');</code></pre>
-    <pre data-prefix="9"><code>console.log(range); // Output: 2026-05-09/2026-05-10</code></pre>
+  <div class="mockup-code mt-4 max-h-[500px] overflow-auto relative group not-prose">
+    <button 
+      class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+      onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Código copiado!')"
+    >
+      Copiar
+    </button>
+    <Code code={importSnippet} lang="ts" theme="nord" class="bg-transparent! px-5" />
   </div>
 
-  <h2>Configuration</h2>
-  <p>The <code>tempo</code> function accepts an optional configuration object:</p>
+  <h2>Configuração</h2>
+  <p>A função <code>tempo</code> aceita um objeto opcional de configuração:</p>
   
-  <div class="mockup-code my-4">
-    <pre data-prefix="1"><code>const result = tempo('amanhã', {"{"}</code></pre>
-    <pre data-prefix="2"><code>  now: new Date('2026-01-01'), // Custom reference date</code></pre>
-    <pre data-prefix="3"><code>{"}"});</code></pre>
+  <div class="mockup-code mt-4 max-h-[500px] overflow-auto relative group not-prose">
+    <button 
+      class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+      onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Código copiado!')"
+    >
+      Copiar
+    </button>
+    <Code code={configSnippet} lang="ts" theme="nord" class="bg-transparent! px-5" />
   </div>
 </DocLayout>

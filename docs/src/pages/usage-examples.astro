@@ -1,94 +1,103 @@
 ---
 import DocLayout from "../layouts/DocLayout.astro";
+import { Code } from 'astro:components';
+
+const errorSnippet = `try {
+  const resultado = tempo('data inválida');
+} catch (e) {
+  console.error("Não foi possível interpretar a data");
+}`;
 ---
 
-<DocLayout title="Usage Examples">
-  <h1>Usage Examples</h1>
+<DocLayout title="Exemplos de Uso">
+  <h1>Exemplos de Uso</h1>
   
   <p>
-    Explore common patterns and expressions supported by <strong>Tempo</strong>.
+    Explore padrões e expressões comuns suportados pelo <strong>Tempo</strong>.
   </p>
 
-  <h2>Single Dates</h2>
-  <p>Relative and absolute date expressions in PT-BR.</p>
+  <h2>Datas Únicas</h2>
+  <p>Expressões de datas relativas e absolutas em PT-BR.</p>
   
   <div class="overflow-x-auto">
     <table class="table">
       <thead>
         <tr>
-          <th>Input</th>
-          <th>Description</th>
+          <th>Entrada</th>
+          <th>Descrição</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><code>"hoje"</code></td>
-          <td>The current day</td>
+          <td>O dia atual</td>
         </tr>
         <tr>
           <td><code>"amanhã"</code></td>
-          <td>The next day</td>
+          <td>O dia seguinte</td>
         </tr>
         <tr>
           <td><code>"ontem"</code></td>
-          <td>The previous day</td>
+          <td>O dia anterior</td>
         </tr>
         <tr>
           <td><code>"daqui a 3 dias"</code></td>
-          <td>Three days in the future</td>
+          <td>Três dias no futuro</td>
         </tr>
         <tr>
           <td><code>"próxima segunda"</code></td>
-          <td>The coming Monday</td>
+          <td>A próxima segunda-feira vindo</td>
         </tr>
         <tr>
           <td><code>"15 de janeiro"</code></td>
-          <td>January 15th of the current year</td>
+          <td>15 de janeiro do ano atual</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <h2 class="mt-10">Date Ranges</h2>
-  <p>Intervals between two dates.</p>
+  <h2 class="mt-16">Intervalos de Datas</h2>
+  <p>Intervalos entre duas datas.</p>
 
   <div class="overflow-x-auto">
     <table class="table">
       <thead>
         <tr>
-          <th>Input</th>
-          <th>Description</th>
+          <th>Entrada</th>
+          <th>Descrição</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><code>"hoje até amanhã"</code></td>
-          <td>Range from today to tomorrow</td>
+          <td>Intervalo de hoje até amanhã</td>
         </tr>
         <tr>
           <td><code>"de ontem a hoje"</code></td>
-          <td>Range from yesterday to today</td>
+          <td>Intervalo de ontem até hoje</td>
         </tr>
         <tr>
           <td><code>"próxima semana"</code></td>
-          <td>Range covering the next 7 days</td>
+          <td>Intervalo cobrindo os próximos 7 dias</td>
         </tr>
         <tr>
           <td><code>"mês que vem"</code></td>
-          <td>Range covering the entire next month</td>
+          <td>Intervalo cobrindo todo o próximo mês</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <h2 class="mt-10">Advanced Usage</h2>
-  <p>Handling errors and invalid inputs.</p>
+  <h2 class="mt-16">Uso Avançado</h2>
+  <p>Tratamento de erros e entradas inválidas.</p>
   
-  <div class="mockup-code my-4">
-    <pre data-prefix="1"><code>try {"{"}</code></pre>
-    <pre data-prefix="2"><code>  const result = tempo('data inválida');</code></pre>
-    <pre data-prefix="3"><code>{"}"} catch (e) {"{"}</code></pre>
-    <pre data-prefix="4"><code>  console.error("Could not parse date");</code></pre>
-    <pre data-prefix="5"><code>{"}"}</code></pre>
+  <div class="mockup-code mt-4 max-h-[500px] overflow-auto relative group not-prose">
+    <button 
+      class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+      onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Código copiado!')"
+    >
+      Copiar
+    </button>
+    <Code code={errorSnippet} lang="ts" theme="nord" class="bg-transparent! px-5" />
   </div>
 </DocLayout>

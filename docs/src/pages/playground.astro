@@ -1,0 +1,309 @@
+---
+import DocLayout from "../layouts/DocLayout.astro";
+import { Code } from 'astro:components';
+
+const reactUseState = `import React, { useState, useEffect } from 'react';
+import { tempo } from './utils/tempo';
+
+export function DateInput() {
+  const [input, setInput] = useState('');
+  const [result, setResult] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setResult(tempo(input));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [input]);
+
+  return (
+    <div>
+      <input 
+        value={input} 
+        onChange={(e) => setInput(e.target.value)} 
+        placeholder="Ex: amanhã" 
+      />
+      {result && <p>Interpretado: {result}</p>}
+    </div>
+  );
+}`;
+
+const reactHookForm = `import { useForm } from 'react-hook-form';
+import { tempo } from './utils/tempo';
+
+export function Form() {
+  const { register, watch } = useForm({
+    defaultValues: { dateStr: '' }
+  });
+  
+  const dateStr = watch('dateStr');
+  const resolved = tempo(dateStr);
+
+  return (
+    <form>
+      <input {...register('dateStr')} placeholder="Ex: próxima sexta" />
+      {resolved && <span>📅 {resolved}</span>}
+    </form>
+  );
+}`;
+
+const angular19 = `import { Component, signal, computed } from '@angular/core';
+import { tempo } from './utils/tempo';
+
+@Component({
+  selector: 'app-tempo-input',
+  template: \`
+    <input [value]="input()" (input)="input.set($any($event).target.value)">
+    @if (result()) {
+      <p>Data: {{ result() }}</p>
+    }
+  \`
+})
+export class TempoInputComponent {
+  input = signal('');
+  result = computed(() => tempo(this.input()));
+}`;
+
+const angular17 = `import { Component } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { tempo } from './utils/tempo';
+import { debounceTime } from 'rxjs/operators';
+
+@Component({
+  standalone: true,
+  imports: [ReactiveFormsModule],
+  template: \`
+    <input [formControl]="control">
+    <p>Resultado: {{ result }}</p>
+  \`
+})
+export class TempoComponent {
+  control = new FormControl('');
+  result: string | null = null;
+
+  constructor() {
+    this.control.valueChanges
+      .pipe(debounceTime(300))
+      .subscribe(val => {
+        this.result = tempo(val || '');
+      });
+  }
+}`;
+---
+
+<DocLayout title="Playground">
+  <h1>Playground Interativo</h1>
+  <p class="lead">Experimente o motor de parse do <strong>Tempo</strong> com uma interface minimalista.</p>
+
+  <div class="mt-12 not-prose">
+    <div class="bg-base-100 border border-base-300 rounded-3xl shadow-2xl p-2 md:p-4 transition-all hover:shadow-primary/5">
+      <div class="relative group">
+        <input 
+          type="text" 
+          id="playground-input"
+          placeholder="digite qualquer coisa..." 
+          class="w-full bg-transparent px-6 py-8 text-2xl md:text-3xl font-mono tracking-tight outline-none border-none placeholder:text-base-content/20"
+          autocomplete="off"
+        />
+        <div id="playground-loader" class="absolute right-8 top-1/2 -translate-y-1/2 hidden">
+          <span class="loading loading-ring loading-md text-primary/40"></span>
+        </div>
+      </div>
+      
+      <div class="px-6 pb-6 pt-2 border-t border-base-200">
+        <div id="playground-meta" class="flex flex-col md:flex-row md:items-center justify-between gap-4 text-sm text-base-content/50">
+          <div id="playground-examples" class="italic flex items-center gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
+            <span class="font-bold non-italic opacity-40">Exemplos:</span>
+            <span class="hover:text-primary cursor-pointer transition-colors" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">amanhã</span>
+            <span class="opacity-20">•</span>
+            <span class="hover:text-primary cursor-pointer transition-colors" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">próxima segunda</span>
+            <span class="opacity-20">•</span>
+            <span class="hover:text-primary cursor-pointer transition-colors" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">de hoje até sexta</span>
+            <span class="opacity-20">•</span>
+            <span class="hover:text-primary cursor-pointer transition-colors" onclick="document.getElementById('playground-input').value = this.innerText; document.getElementById('playground-input').dispatchEvent(new Event('input'))">natal até ano novo</span>
+          </div>
+          <div class="hidden md:block opacity-40">Pressione <kbd class="kbd kbd-xs">Tab</kbd> para navegar.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultado Expandido -->
+    <div id="playground-output" class="mt-8 hidden transition-all duration-500 opacity-0 scale-95">
+      <div class="bg-primary/5 border border-primary/10 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="flex flex-col gap-1">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-primary/60">Data Formatada</span>
+          <div id="playground-human" class="text-2xl md:text-3xl font-semibold text-base-content tracking-tight"></div>
+        </div>
+        
+        <div class="flex flex-col items-end gap-1">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-primary/60 self-center md:self-end">Retorno Bruto</span>
+          <div class="flex items-center gap-2">
+            <code id="playground-raw" class="bg-base-200 px-3 py-1 rounded-lg font-mono text-sm font-medium text-primary/80"></code>
+            <div id="playground-badge" class="badge badge-primary badge-sm font-bold tracking-tighter uppercase text-[8px] h-5"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="playground-error" class="mt-8 hidden animate-in fade-in slide-in-from-top-4 duration-300">
+      <div class="bg-error/5 border border-error/10 rounded-2xl p-6 text-error text-center font-medium flex items-center justify-center gap-3 italic">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        não consegui entender essa... tente algo diferente!
+      </div>
+    </div>
+  </div>
+
+  <h2 class="mt-24">Aplicações Práticas</h2>
+  <p>Como integrar o <strong>Tempo</strong> em seus componentes e formulários.</p>
+
+  <div class="tabs tabs-lifted mt-12 not-prose" role="tablist">
+    <input type="radio" name="framework_tabs" role="tab" class="tab" aria-label="React" checked />
+    <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-8">
+      <div class="flex flex-col gap-12">
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold">React + useState</h3>
+            <span class="badge badge-outline opacity-50">v18+</span>
+          </div>
+          <div class="mockup-code relative group max-h-[500px] overflow-auto">
+            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Copiado!')">Copiar</button>
+            <Code code={reactUseState} lang="ts" theme="nord" class="bg-transparent! px-5" />
+          </div>
+        </section>
+        
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold">React Hook Form</h3>
+            <span class="badge badge-outline opacity-50">v7+</span>
+          </div>
+          <div class="mockup-code relative group max-h-[500px] overflow-auto">
+            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Copiado!')">Copiar</button>
+            <Code code={reactHookForm} lang="ts" theme="nord" class="bg-transparent! px-5" />
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <input type="radio" name="framework_tabs" role="tab" class="tab" aria-label="Angular" />
+    <div role="tabpanel" class="tab-content bg-base-100 border-base-300 rounded-box p-8">
+      <div class="flex flex-col gap-12">
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold">Angular 19 (Signals)</h3>
+            <span class="badge badge-outline opacity-50">Signals</span>
+          </div>
+          <div class="mockup-code relative group max-h-[500px] overflow-auto">
+            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Copiado!')">Copiar</button>
+            <Code code={angular19} lang="ts" theme="nord" class="bg-transparent! px-5" />
+          </div>
+        </section>
+        
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold">Angular 17 (Reactive Forms)</h3>
+            <span class="badge badge-outline opacity-50">RxJS</span>
+          </div>
+          <div class="mockup-code relative group max-h-[500px] overflow-auto">
+            <button class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity" onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Copiado!')">Copiar</button>
+            <Code code={angular17} lang="ts" theme="nord" class="bg-transparent! px-5" />
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { tempo } from "../../../src/index";
+
+    const input = document.getElementById('playground-input') as HTMLInputElement;
+    const loader = document.getElementById('playground-loader');
+    const output = document.getElementById('playground-output');
+    const error = document.getElementById('playground-error');
+    
+    const humanDisplay = document.getElementById('playground-human');
+    const rawDisplay = document.getElementById('playground-raw');
+    const badgeDisplay = document.getElementById('playground-badge');
+
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const formatter = new Intl.DateTimeFormat('pt-BR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    const formatHuman = (iso: string) => {
+      if (!iso) return '';
+      const parts = iso.split('/');
+      
+      const formatSingle = (s: string) => {
+        const [y, m, d] = s.split('-').map(Number);
+        const date = new Date(y, m - 1, d, 12, 0, 0);
+        return formatter.format(date);
+      };
+
+      if (parts.length === 2) {
+        // Formato simplificado para ranges no human-readable
+        const start = formatSingle(parts[0]).replace(', ' + new Date().getFullYear(), '');
+        const end = formatSingle(parts[1]);
+        return `${start} — ${end}`;
+      }
+
+      return formatSingle(parts[0]);
+    };
+
+    input?.addEventListener('input', (e) => {
+      const val = (e.target as HTMLInputElement).value;
+      
+      clearTimeout(timeout);
+      
+      if (!val.trim()) {
+        hideAll();
+        return;
+      }
+
+      loader?.classList.remove('hidden');
+      
+      timeout = setTimeout(() => {
+        try {
+          const parsed = tempo(val);
+          loader?.classList.add('hidden');
+          
+          if (parsed) {
+            showResult(parsed);
+          } else {
+            showError();
+          }
+        } catch (err) {
+          loader?.classList.add('hidden');
+          showError();
+        }
+      }, 300);
+    });
+
+    function hideAll() {
+      output?.classList.add('hidden', 'opacity-0', 'scale-95');
+      error?.classList.add('hidden');
+    }
+
+    function showResult(val: string) {
+      error?.classList.add('hidden');
+      output?.classList.remove('hidden');
+      
+      // Pequeno delay para a animação de entrada funcionar após remover o hidden
+      requestAnimationFrame(() => {
+        output?.classList.remove('opacity-0', 'scale-95');
+      });
+      
+      if (humanDisplay) humanDisplay.textContent = formatHuman(val);
+      if (rawDisplay) rawDisplay.textContent = val;
+      if (badgeDisplay) badgeDisplay.textContent = val.includes('/') ? 'Range' : 'Single';
+    }
+
+    function showError() {
+      output?.classList.add('hidden', 'opacity-0', 'scale-95');
+      error?.classList.remove('hidden');
+    }
+  </script>
+</DocLayout>

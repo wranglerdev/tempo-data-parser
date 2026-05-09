@@ -1,0 +1,60 @@
+---
+import DocLayout from "../layouts/DocLayout.astro";
+import { Code } from 'astro:components';
+
+const tempoToDateSnippet = `/**
+ * Converte o retorno do Tempo para objetos Date nativos.
+ * @param result Retorno da função tempo (string ou null)
+ * @returns Date | [Date, Date] | null
+ */
+export function tempoToDate(result: string | null): Date | [Date, Date] | null {
+  if (!result) return null;
+  
+  const parts = result.split('/');
+  
+  const parse = (s: string) => {
+    const [y, m, d] = s.split('-').map(Number);
+    // Meio-dia para evitar problemas de fuso horário em diferentes ambientes
+    return new Date(y, m - 1, d, 12, 0, 0);
+  };
+
+  if (parts.length === 2) {
+    return [parse(parts[0]), parse(parts[1])] as [Date, Date];
+  }
+  
+  return parse(parts[0]);
+}
+
+// Exemplo de Uso:
+const data = tempoToDate("2026-05-09"); // Date object
+const intervalo = tempoToDate("2026-05-09/2026-05-15"); // [Date, Date]`;
+---
+
+<DocLayout title="Extensões">
+  <h1>Extensões e Utilitários</h1>
+  <p class="lead">
+    Snippets de código prontos para estender as capacidades do <strong>Tempo</strong> no seu projeto.
+  </p>
+
+  <div class="alert alert-info mt-8">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    <span>Estes utilitários não fazem parte do core da biblioteca para mantê-la leve, mas são recomendados para integrações complexas.</span>
+  </div>
+
+  <section class="mt-12">
+    <h2>Conversor: Tempo para Date</h2>
+    <p>
+      Uma utilidade essencial para converter as strings ISO retornadas pela biblioteca em objetos <code>Date</code> nativos do JavaScript, facilitando o uso com bibliotecas como <code>date-fns</code> ou <code>dayjs</code>.
+    </p>
+
+    <div class="mockup-code mt-6 max-h-[600px] overflow-auto relative group not-prose">
+      <button 
+        class="btn btn-xs btn-ghost absolute right-4 top-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+        onclick="navigator.clipboard.writeText(this.parentElement.querySelector('code').innerText); alert('Utilitário copiado!')"
+      >
+        Copiar
+      </button>
+      <Code code={tempoToDateSnippet} lang="ts" theme="nord" class="bg-transparent! px-5" />
+    </div>
+  </section>
+</DocLayout>

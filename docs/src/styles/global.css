@@ -13,18 +13,18 @@
   prefersdark: false;
   color-scheme: light;
 
-  --color-primary: #00a3e2;
+  --color-primary: #5e81ac;
   --color-primary-content: #ffffff;
   --color-secondary: #88c0d0;
   --color-secondary-content: #2e3440;
-  --color-accent: #5e81ac;
+  --color-accent: #81a1c1;
   --color-accent-content: #ffffff;
   --color-neutral: #3b4252;
   --color-neutral-content: #eceff4;
   --color-base-100: #ffffff;
   --color-base-200: #f8fafc;
   --color-base-300: #f1f5f9;
-  --color-base-content: #1e293b;
+  --color-base-content: #2e3440;
   --color-info: #81a1c1;
   --color-info-content: #ffffff;
   --color-success: #a3be8c;
@@ -45,12 +45,12 @@
   prefersdark: true;
   color-scheme: dark;
 
-  --color-primary: #00a3e2;
-  --color-primary-content: #ffffff;
+  --color-primary: #88c0d0;
+  --color-primary-content: #2e3440;
   --color-secondary: #81a1c1;
   --color-secondary-content: #2e3440;
-  --color-accent: #88c0d0;
-  --color-accent-content: #2e3440;
+  --color-accent: #5e81ac;
+  --color-accent-content: #ffffff;
   --color-neutral: #434c5e;
   --color-neutral-content: #eceff4;
   --color-base-100: #2e3440;
@@ -73,15 +73,27 @@
 
 /* Custom styles for polar look */
 .prose h1, .prose h2, .prose h3 {
-  @apply tracking-tight font-semibold text-base-content;
+  @apply tracking-tight font-semibold text-base-content mt-12 mb-6;
+}
+
+.prose h1 {
+  @apply mt-4 mb-8;
 }
 
 .prose p {
-  @apply text-base-content/80 leading-relaxed;
+  @apply text-base-content/80 leading-relaxed mb-6;
+}
+
+.prose ul, .prose ol {
+  @apply mb-6 ml-6;
+}
+
+.prose li {
+  @apply mb-2;
 }
 
 .mockup-code {
-  @apply bg-[#2E3440] text-[#D8DEE9] border border-[#434C5E] shadow-xl rounded-xl;
+  @apply bg-[#2E3440] text-[#D8DEE9] border border-[#434C5E] shadow-xl rounded-xl my-6;
 }
 
 [data-theme="polar-dark"] .mockup-code {

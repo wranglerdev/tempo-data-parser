@@ -2,33 +2,33 @@
 import DocLayout from "../layouts/DocLayout.astro";
 ---
 
-<DocLayout title="Introduction">
+<DocLayout title="Introdução">
   <h1>Tempo</h1>
   <p class="lead">
-    A lightweight, dependency-free TypeScript library to parse natural language (PT-BR) into dates and date ranges.
+    Uma biblioteca TypeScript leve e sem dependências para interpretar linguagem natural (PT-BR) em datas e intervalos de datas.
   </p>
   
   <p>
-    <strong>Tempo</strong> (Portuguese for "Time") was built to handle human-readable date inputs like <em>"hoje"</em>, <em>"amanhã"</em>, <em>"próxima segunda"</em>, or <em>"de 01/01 até 10/01"</em> and convert them into standard ISO date formats or ranges.
+    O <strong>Tempo</strong> foi construído para lidar com entradas de datas legíveis por humanos, como <em>"hoje"</em>, <em>"amanhã"</em>, <em>"próxima segunda"</em>, ou <em>"de 01/01 até 10/01"</em> e convertê-las em formatos de data ISO padrão ou intervalos.
   </p>
 
-  <h2>Key Features</h2>
+  <h2>Principais Funcionalidades</h2>
   <ul>
-    <li><strong>Natural Language:</strong> Supports a wide variety of Portuguese expressions for dates and relative times.</li>
-    <li><strong>Range Support:</strong> Easily parses intervals (e.g., "hoje até amanhã").</li>
-    <li><strong>Zero Dependencies:</strong> Designed as a "pure" library that can be vendorized directly into your project.</li>
-    <li><strong>Type Safe:</strong> Built with TypeScript for full type safety and developer productivity.</li>
+    <li><strong>Linguagem Natural:</strong> Suporta uma grande variedade de expressões em português para datas e tempos relativos.</li>
+    <li><strong>Suporte a Intervalos:</strong> Interpreta facilmente intervalos (ex: "hoje até amanhã").</li>
+    <li><strong>Zero Dependências:</strong> Projetado como uma biblioteca "pura" que pode ser vendorizada diretamente no seu projeto.</li>
+    <li><strong>Type Safe:</strong> Construído com TypeScript para total segurança de tipos e produtividade do desenvolvedor.</li>
   </ul>
 
-  <div class="alert alert-info shadow-sm mt-8">
+  <div class="alert alert-info">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-    <span>Inspired by <strong>hot-date</strong>, Tempo aims to provide a similar intuitive experience for the Portuguese language.</span>
+    <span>Inspirado pelo <strong>hot-date</strong>, o Tempo visa fornecer uma experiência intuitiva semelhante para a língua portuguesa.</span>
   </div>
 
-  <h2>Supported Formats</h2>
-  <p>The library returns either a single date or a range in the following formats:</p>
+  <h2>Formatos Suportados</h2>
+  <p>A biblioteca retorna uma única data ou um intervalo nos seguintes formatos:</p>
   <ul>
-    <li><strong>Single Date:</strong> <code>YYYY-MM-DD</code></li>
-    <li><strong>Interval/Range:</strong> <code>YYYY-MM-DD/YYYY-MM-DD</code></li>
+    <li><strong>Data Única:</strong> <code>YYYY-MM-DD</code></li>
+    <li><strong>Intervalo/Range:</strong> <code>YYYY-MM-DD/YYYY-MM-DD</code></li>
   </ul>
 </DocLayout>
