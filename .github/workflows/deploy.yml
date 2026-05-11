@@ -5,6 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'docs/**'
+      - 'src/**'
   workflow_dispatch:
 
 permissions:
