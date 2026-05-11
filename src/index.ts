@@ -113,6 +113,11 @@ export function tempo(input: string, options: TempoOptions = {}): string | null 
         if (s && e) {
           const sO = new Date(s + 'T12:00:00'); const eO = new Date(e + 'T12:00:00');
           if (eO < sO && !ePart.includes('atras') && !ePart.includes('passad')) {
+            // Quando o fim é âncora de presente ("hoje") e o início resolveu para
+            // o futuro, o usuário quer dizer a ocorrência anterior (ano passado).
+            if (ePart === 'hoje' && sO > ref) {
+              sO.setFullYear(sO.getFullYear() - 1); return `${toISODate(sO)}/${e}`;
+            }
             eO.setFullYear(eO.getFullYear() + 1); return `${s}/${toISODate(eO)}`;
           }
           return `${s}/${e}`;

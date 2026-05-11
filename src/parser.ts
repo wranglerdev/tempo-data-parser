@@ -241,18 +241,20 @@ function getBaseDate(input: string, ref: Date, contextDate?: Date): Date | null 
   }
 
   // 11. Formatos Numéricos
-  const yyyymmdd = clean.match(/^(\d{4}) (\d{1,2}) (\d{1,2})$/);
+  // Strip "dia " prefix so "dia 05/11/2025" (→ "dia 05 11 2025") also matches
+  const cleanNum = clean.replace(/^dia\s+/, '');
+  const yyyymmdd = cleanNum.match(/^(\d{4}) (\d{1,2}) (\d{1,2})$/);
   if (yyyymmdd && yyyymmdd[1] && yyyymmdd[2] && yyyymmdd[3]) {
     const y = parseInt(yyyymmdd[1]); const m = parseInt(yyyymmdd[2]) - 1; const d = parseInt(yyyymmdd[3]);
     const res = new Date(y, m, d); if (res.getDate() === d) return res;
   }
-  const ddmmyyyy = clean.match(/^(\d{1,2}) (\d{1,2})(?: (\d{2,4}))?$/);
+  const ddmmyyyy = cleanNum.match(/^(\d{1,2}) (\d{1,2})(?: (\d{2,4}))?$/);
   if (ddmmyyyy && ddmmyyyy[1] && ddmmyyyy[2]) {
     const d = parseInt(ddmmyyyy[1]); const m = parseInt(ddmmyyyy[2]) - 1;
     let y = ddmmyyyy[3] ? parseInt(ddmmyyyy[3]) : date.getFullYear(); if (y < 100) y += 2000;
     const res = new Date(y, m, d); if (res.getDate() === d) return res;
   }
-  const yyyymm = clean.match(/^(\d{4}) (\d{1,2})$/);
+  const yyyymm = cleanNum.match(/^(\d{4}) (\d{1,2})$/);
   if (yyyymm && yyyymm[1] && yyyymm[2]) {
     const y = parseInt(yyyymm[1]); const m = parseInt(yyyymm[2]) - 1;
     return new Date(y, m, 1);
